@@ -1,0 +1,21 @@
+# Archivos y carpetas de Maven
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Archivos de configuración de IDEs
+*.iml
+.idea/
+*.classpath
+*.project
+*.settings/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de log y temporales
+*.log
+*.tmp
+
+# Archivos de configuración personal
+*.env
