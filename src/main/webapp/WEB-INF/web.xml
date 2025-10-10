@@ -1,7 +1,33 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
 
-<web-app>
-  <display-name>Archetype Created Web Application</display-name>
+  <display-name>Sistema de Seguimiento de Hábitos</display-name>
+  <description>Aplicación web para el seguimiento de hábitos personales</description>
+
+  <!-- Página de bienvenida -->
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>login.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- Configuración de sesión -->
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+
+  <!-- Páginas de error -->
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error.jsp</location>
+  </error-page>
+  
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error.jsp</location>
+  </error-page>
+
 </web-app>

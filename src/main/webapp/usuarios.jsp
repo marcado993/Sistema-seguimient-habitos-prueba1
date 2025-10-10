@@ -35,28 +35,26 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nombre</th>
-                <th>Email</th>
+                <th>Correo</th>
             </tr>
         </thead>
         <tbody>
             <%
                 List<Usuario> usuarios = (List<Usuario>) request.getAttribute("usuarios");
                 if (usuarios != null && !usuarios.isEmpty()) {
-                    for (Usuario u : usuarios) {
+                    for (Usuario usuario : usuarios) {
             %>
             <tr>
-                <td><%= u.getId() %></td>
-                <td><%= u.getNombre() %></td>
-                <td><%= u.getCorreo() %></td>
+                <td><%= usuario.getNombre() %></td>
+                <td><%= usuario.getCorreo() %></td>
             </tr>
             <%
                     }
                 } else {
             %>
             <tr>
-                <td colspan="3" style="text-align: center;">No hay usuarios registrados</td>
+                <td colspan="2" style="text-align: center;">No hay usuarios registrados</td>
             </tr>
             <%
                 }
@@ -65,7 +63,7 @@
     </table>
 
     <div style="text-align: center; margin-top: 20px;">
-        <a href="index.jsp">Volver al inicio</a>
+        <a href="dashboard.jsp">Volver al Dashboard</a>
     </div>
 </body>
 </html>
