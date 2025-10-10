@@ -10,11 +10,11 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- Registra las entidades -->
-        <class>com.example.model.User</class>
+        <class>com.example.model.Usuario</class>
         <class>com.example.model.Objetivo</class>
         <class>com.example.model.RegistroProgreso</class>
         <class>com.example.model.Habito</class>
-        <class>com.example.model.SeguimientoHabito</class>
+        <class>com.example.model.RegistroHabito</class>
         <class>com.example.model.TareaKanban</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>

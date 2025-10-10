@@ -37,6 +37,9 @@ public class Objetivo {
     
     @OneToMany(mappedBy = "objetivo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RegistroProgreso> registrosProgreso = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "objetivo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Habito> habitos = new ArrayList<>();
 
     // Enum para el estado del objetivo
     public enum EstadoObjetivo {
@@ -128,6 +131,21 @@ public class Objetivo {
 
     public void setRegistrosProgreso(List<RegistroProgreso> registrosProgreso) {
         this.registrosProgreso = registrosProgreso;
+    }
+    
+    public List<Habito> getHabitos() {
+        return habitos;
+    }
+
+    public void setHabitos(List<Habito> habitos) {
+        this.habitos = habitos;
+    }
+    
+    public void agregarHabito(Habito habito) {
+        if (habito != null) {
+            habito.setObjetivo(this);
+            this.habitos.add(habito);
+        }
     }
 
     // Métodos de utilidad

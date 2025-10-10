@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Controlador de Objetivos según el diagrama de clases
@@ -98,13 +99,35 @@ public class ControladorObjetivo extends HttpServlet {
         HttpSession session = request.getSession();
         String usuarioId = (String) session.getAttribute("usuarioId");
         
+        if (usuarioId == null || usuarioId.isEmpty()) {
+            usuarioId = "usuario_demo"; // Usuario por defecto
+        }
+        
+        System.out.println("🎯 ControladorObjetivo - GET action: " + action + ", usuarioId: " + usuarioId);
+        
         if ("nuevo".equals(action)) {
             // Mostrar formulario para crear objetivo
-            request.getRequestDispatcher("/WEB-INF/views/objetivos/formulario.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
+        } else if ("planificar".equals(action)) {
+            // Mostrar página de planificación con lista de objetivos
+            try {
+                List<Objetivo> objetivos = objetivoDAO.findByUsuarioId(usuarioId);
+                System.out.println("📋 Objetivos encontrados para planificar: " + objetivos.size());
+                request.setAttribute("objetivos", objetivos);
+                request.getRequestDispatcher("/WEB-INF/views/planificarObjetivo.jsp").forward(request, response);
+            } catch (Exception e) {
+                System.err.println("❌ Error al cargar objetivos: " + e.getMessage());
+                e.printStackTrace();
+                request.setAttribute("error", "Error al cargar objetivos: " + e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
+            }
         } else if ("listar".equals(action)) {
             // Listar objetivos del usuario
             request.setAttribute("objetivos", objetivoDAO.findByUsuarioId(usuarioId));
-            request.getRequestDispatcher("/WEB-INF/views/objetivos/lista.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/vistaSeguimiento.jsp").forward(request, response);
+        } else {
+            // Por defecto, mostrar formulario
+            request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
         }
     }
     
@@ -115,21 +138,77 @@ public class ControladorObjetivo extends HttpServlet {
         HttpSession session = request.getSession();
         String usuarioId = (String) session.getAttribute("usuarioId");
         
+        if (usuarioId == null || usuarioId.isEmpty()) {
+            usuarioId = "usuario_demo"; // Usuario por defecto
+        }
+        
         String action = request.getParameter("action");
         
         if ("crear".equals(action)) {
-            String nombre = request.getParameter("nombre");
-            String categoria = request.getParameter("categoria");
-            String frecuencia = request.getParameter("frecuencia");
+            String titulo = request.getParameter("titulo");
+            String descripcion = request.getParameter("descripcion");
+            String fechaInicioStr = request.getParameter("fechaInicio");
+            String fechaFinStr = request.getParameter("fechaFin");
+            String estadoStr = request.getParameter("estado");
             
-            Objetivo nuevoObjetivo = crear(nombre, categoria, frecuencia);
+            System.out.println("📝 Creando objetivo: " + titulo);
             
-            if (nuevoObjetivo != null) {
-                notificarExitoRegistro(nuevoObjetivo);
-                limpiarFormulario(request);
-                response.sendRedirect("controlador-objetivos?action=listar&success=true");
-            } else {
-                response.sendRedirect("controlador-objetivos?action=nuevo&error=true");
+            try {
+                Objetivo nuevoObjetivo = new Objetivo();
+                nuevoObjetivo.setTitulo(titulo);
+                nuevoObjetivo.setDescripcion(descripcion);
+                nuevoObjetivo.setUsuarioId(usuarioId);
+                
+                // Parsear estado
+                if (estadoStr != null && !estadoStr.isEmpty()) {
+                    try {
+                        nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.valueOf(estadoStr));
+                    } catch (IllegalArgumentException e) {
+                        nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
+                    }
+                } else {
+                    nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
+                }
+                
+                nuevoObjetivo.setProgreso(0);
+                
+                // Parsear fechas si existen
+                if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
+                    nuevoObjetivo.setFechaCreacion(java.time.LocalDate.parse(fechaInicioStr).atStartOfDay());
+                }
+                
+                if (fechaFinStr != null && !fechaFinStr.isEmpty()) {
+                    nuevoObjetivo.setFechaLimite(java.time.LocalDate.parse(fechaFinStr).atStartOfDay());
+                }
+                
+                // Guardar objetivo
+                nuevoObjetivo = objetivoDAO.save(nuevoObjetivo);
+                System.out.println("✅ Objetivo guardado con ID: " + nuevoObjetivo.getId());
+                
+                if (nuevoObjetivo != null && nuevoObjetivo.getId() != null) {
+                    String mensaje = notificarExitoRegistro(nuevoObjetivo);
+                    session.setAttribute("mensaje", mensaje);
+                    session.setAttribute("ultimoObjetivoCreado", nuevoObjetivo.getId());
+                    limpiarFormulario(request);
+                    
+                    // Cargar TODOS los objetivos del usuario
+                    List<Objetivo> objetivos = objetivoDAO.findByUsuarioId(usuarioId);
+                    System.out.println("📋 Cargando objetivos para planificar. Total: " + objetivos.size());
+                    
+                    request.setAttribute("objetivos", objetivos);
+                    request.setAttribute("objetivoRecienCreado", nuevoObjetivo.getId());
+                    
+                    // Forward a planificar objetivo
+                    request.getRequestDispatcher("/WEB-INF/views/planificarObjetivo.jsp").forward(request, response);
+                } else {
+                    System.err.println("❌ Error: Objetivo guardado pero ID es null");
+                    response.sendRedirect("controlador-objetivos?action=nuevo&error=save");
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Error al crear objetivo: " + e.getMessage());
+                e.printStackTrace();
+                request.setAttribute("error", "Error al crear el objetivo: " + e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
             }
         }
     }

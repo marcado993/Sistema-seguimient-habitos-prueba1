@@ -1,7 +1,7 @@
 package com.example.dao;
 
 import com.example.model.Habito;
-import com.example.model.SeguimientoHabito;
+import com.example.model.RegistroHabito;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
@@ -15,7 +15,10 @@ public class HabitoDAO {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Habito> query = em.createQuery(
-                "SELECT h FROM Habito h WHERE h.usuarioId = :usuarioId AND h.activo = true ORDER BY h.fechaCreacion DESC", 
+                "SELECT DISTINCT h FROM Habito h " +
+                "LEFT JOIN FETCH h.registros " +
+                "WHERE h.usuarioId = :usuarioId AND h.activo = true " +
+                "ORDER BY h.fechaCreacion DESC", 
                 Habito.class);
             query.setParameter("usuarioId", usuarioId);
             return query.getResultList();
@@ -38,7 +41,10 @@ public class HabitoDAO {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Habito> query = em.createQuery(
-                "SELECT h FROM Habito h WHERE h.usuarioId = :usuarioId AND h.activo = true ORDER BY h.nombre", 
+                "SELECT DISTINCT h FROM Habito h " +
+                "LEFT JOIN FETCH h.registros " +
+                "WHERE h.usuarioId = :usuarioId AND h.activo = true " +
+                "ORDER BY h.nombre", 
                 Habito.class);
             query.setParameter("usuarioId", usuarioId);
             return query.getResultList();
@@ -52,17 +58,35 @@ public class HabitoDAO {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+            
+            // Log para debugging
+            System.out.println("💾 Guardando hábito: " + habito.getNombre());
+            if (habito.getObjetivo() != null) {
+                System.out.println("🎯 Asociado al objetivo ID: " + habito.getObjetivo().getId());
+                // Asegurar que el objetivo esté en el contexto de persistencia
+                if (!em.contains(habito.getObjetivo())) {
+                    habito.setObjetivo(em.merge(habito.getObjetivo()));
+                }
+            }
+            
             if (habito.getId() == null) {
                 em.persist(habito);
+                System.out.println("✅ Hábito persistido con ID: " + habito.getId());
             } else {
                 habito = em.merge(habito);
+                System.out.println("✅ Hábito actualizado con ID: " + habito.getId());
             }
+            
             tx.commit();
+            System.out.println("✅ Transacción confirmada");
             return habito;
         } catch (Exception e) {
             if (tx.isActive()) {
                 tx.rollback();
+                System.err.println("❌ Transacción revertida");
             }
+            System.err.println("❌ Error al guardar hábito: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Error al guardar hábito", e);
         } finally {
             em.close();
@@ -90,44 +114,44 @@ public class HabitoDAO {
         }
     }
 
-    public SeguimientoHabito findSeguimientoByFecha(Long habitoId, LocalDate fecha) {
+    public RegistroHabito findRegistroByFecha(Long habitoId, LocalDate fecha) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
-            TypedQuery<SeguimientoHabito> query = em.createQuery(
-                "SELECT s FROM SeguimientoHabito s WHERE s.habito.id = :habitoId AND s.fecha = :fecha", 
-                SeguimientoHabito.class);
+            TypedQuery<RegistroHabito> query = em.createQuery(
+                "SELECT r FROM RegistroHabito r WHERE r.habito.id = :habitoId AND r.fecha = :fecha", 
+                RegistroHabito.class);
             query.setParameter("habitoId", habitoId);
             query.setParameter("fecha", fecha);
-            List<SeguimientoHabito> resultados = query.getResultList();
+            List<RegistroHabito> resultados = query.getResultList();
             return resultados.isEmpty() ? null : resultados.get(0);
         } finally {
             em.close();
         }
     }
 
-    public SeguimientoHabito saveSeguimiento(SeguimientoHabito seguimiento) {
+    public RegistroHabito saveRegistro(RegistroHabito registro) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            if (seguimiento.getId() == null) {
-                em.persist(seguimiento);
+            if (registro.getId() == null) {
+                em.persist(registro);
             } else {
-                seguimiento = em.merge(seguimiento);
+                registro = em.merge(registro);
             }
             tx.commit();
-            return seguimiento;
+            return registro;
         } catch (Exception e) {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            throw new RuntimeException("Error al guardar seguimiento", e);
+            throw new RuntimeException("Error al guardar registro", e);
         } finally {
             em.close();
         }
     }
 
-    public void registrarCompletado(Long habitoId, LocalDate fecha, String notas) {
+    public void registrarCompletado(Long habitoId, LocalDate fecha, String observacion) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -138,28 +162,28 @@ public class HabitoDAO {
                 throw new IllegalArgumentException("Hábito no encontrado");
             }
 
-            // Buscar seguimiento existente
-            TypedQuery<SeguimientoHabito> query = em.createQuery(
-                "SELECT s FROM SeguimientoHabito s WHERE s.habito.id = :habitoId AND s.fecha = :fecha", 
-                SeguimientoHabito.class);
+            // Buscar registro existente
+            TypedQuery<RegistroHabito> query = em.createQuery(
+                "SELECT r FROM RegistroHabito r WHERE r.habito.id = :habitoId AND r.fecha = :fecha", 
+                RegistroHabito.class);
             query.setParameter("habitoId", habitoId);
             query.setParameter("fecha", fecha);
             
-            List<SeguimientoHabito> existentes = query.getResultList();
-            SeguimientoHabito seguimiento;
+            List<RegistroHabito> existentes = query.getResultList();
+            RegistroHabito registro;
             
             if (existentes.isEmpty()) {
-                // Crear nuevo seguimiento
-                seguimiento = new SeguimientoHabito(habito, fecha, 1, notas);
-                em.persist(seguimiento);
+                // Crear nuevo registro
+                registro = new RegistroHabito(habito, fecha, 1, observacion);
+                em.persist(registro);
             } else {
                 // Incrementar existente
-                seguimiento = existentes.get(0);
-                seguimiento.incrementarCompletado();
-                if (notas != null && !notas.trim().isEmpty()) {
-                    seguimiento.setNotas(notas);
+                registro = existentes.get(0);
+                registro.setCompletado(registro.getCompletado() + 1);
+                if (observacion != null && !observacion.trim().isEmpty()) {
+                    registro.setObservacion(observacion);
                 }
-                em.merge(seguimiento);
+                em.merge(registro);
             }
             
             tx.commit();
@@ -173,12 +197,12 @@ public class HabitoDAO {
         }
     }
 
-    public List<SeguimientoHabito> findSeguimientosByRango(Long habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<RegistroHabito> findRegistrosByRango(Long habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
-            TypedQuery<SeguimientoHabito> query = em.createQuery(
-                "SELECT s FROM SeguimientoHabito s WHERE s.habito.id = :habitoId AND s.fecha BETWEEN :inicio AND :fin ORDER BY s.fecha DESC", 
-                SeguimientoHabito.class);
+            TypedQuery<RegistroHabito> query = em.createQuery(
+                "SELECT r FROM RegistroHabito r WHERE r.habito.id = :habitoId AND r.fecha BETWEEN :inicio AND :fin ORDER BY r.fecha DESC", 
+                RegistroHabito.class);
             query.setParameter("habitoId", habitoId);
             query.setParameter("inicio", fechaInicio);
             query.setParameter("fin", fechaFin);
@@ -188,12 +212,12 @@ public class HabitoDAO {
         }
     }
 
-    public List<SeguimientoHabito> findSeguimientosDeHoy(String usuarioId) {
+    public List<RegistroHabito> findRegistrosDeHoy(String usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
-            TypedQuery<SeguimientoHabito> query = em.createQuery(
-                "SELECT s FROM SeguimientoHabito s WHERE s.habito.usuarioId = :usuarioId AND s.fecha = :hoy", 
-                SeguimientoHabito.class);
+            TypedQuery<RegistroHabito> query = em.createQuery(
+                "SELECT r FROM RegistroHabito r WHERE r.habito.usuarioId = :usuarioId AND r.fecha = :hoy", 
+                RegistroHabito.class);
             query.setParameter("usuarioId", usuarioId);
             query.setParameter("hoy", LocalDate.now());
             return query.getResultList();
@@ -206,7 +230,7 @@ public class HabitoDAO {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Long> query = em.createQuery(
-                "SELECT COUNT(s) FROM SeguimientoHabito s WHERE s.habito.usuarioId = :usuarioId AND s.fecha = :hoy AND s.completado >= s.habito.metaDiaria", 
+                "SELECT COUNT(r) FROM RegistroHabito r WHERE r.habito.usuarioId = :usuarioId AND r.fecha = :hoy AND r.completado >= r.habito.metaDiaria", 
                 Long.class);
             query.setParameter("usuarioId", usuarioId);
             query.setParameter("hoy", LocalDate.now());
@@ -233,7 +257,7 @@ public class HabitoDAO {
 
             // Hábitos completados en la semana
             TypedQuery<Long> queryCompletados = em.createQuery(
-                "SELECT COUNT(s) FROM SeguimientoHabito s WHERE s.habito.usuarioId = :usuarioId AND s.fecha BETWEEN :inicio AND :fin AND s.completado >= s.habito.metaDiaria", 
+                "SELECT COUNT(r) FROM RegistroHabito r WHERE r.habito.usuarioId = :usuarioId AND r.fecha BETWEEN :inicio AND :fin AND r.completado >= r.habito.metaDiaria", 
                 Long.class);
             queryCompletados.setParameter("usuarioId", usuarioId);
             queryCompletados.setParameter("inicio", inicioSemana);

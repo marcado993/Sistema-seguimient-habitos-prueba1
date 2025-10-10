@@ -64,17 +64,28 @@ public class ObjetivoDAO {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+            
+            // Log para debugging
+            System.out.println("💾 Guardando objetivo: " + objetivo.getTitulo());
+            
             if (objetivo.getId() == null) {
                 em.persist(objetivo);
+                System.out.println("✅ Objetivo persistido con ID: " + objetivo.getId());
             } else {
                 objetivo = em.merge(objetivo);
+                System.out.println("✅ Objetivo actualizado con ID: " + objetivo.getId());
             }
+            
             tx.commit();
+            System.out.println("✅ Transacción confirmada");
             return objetivo;
         } catch (Exception e) {
             if (tx.isActive()) {
                 tx.rollback();
+                System.err.println("❌ Transacción revertida");
             }
+            System.err.println("❌ Error al guardar objetivo: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Error al guardar objetivo", e);
         } finally {
             em.close();

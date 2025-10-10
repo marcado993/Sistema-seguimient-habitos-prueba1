@@ -39,8 +39,12 @@ public class Habito {
     @Column(name = "activo")
     private Boolean activo = true;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "objetivo_id")
+    private Objetivo objetivo;
+    
     @OneToMany(mappedBy = "habito", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<SeguimientoHabito> seguimientos = new ArrayList<>();
+    private List<RegistroHabito> registros = new ArrayList<>();
 
     // Enum para la frecuencia del hábito
     public enum FrecuenciaHabito {
@@ -136,24 +140,32 @@ public class Habito {
         this.activo = activo;
     }
 
-    public List<SeguimientoHabito> getSeguimientos() {
-        return seguimientos;
+    public List<RegistroHabito> getRegistros() {
+        return registros;
     }
 
-    public void setSeguimientos(List<SeguimientoHabito> seguimientos) {
-        this.seguimientos = seguimientos;
+    public void setRegistros(List<RegistroHabito> registros) {
+        this.registros = registros;
+    }
+    
+    public Objetivo getObjetivo() {
+        return objetivo;
+    }
+
+    public void setObjetivo(Objetivo objetivo) {
+        this.objetivo = objetivo;
     }
 
     // Métodos de utilidad
     
     /**
-     * Método para agregar un registro de progreso según el diagrama
+     * Método para agregar un registro según el diagrama
      */
-    public RegistroProgreso agregarRegistro(RegistroProgreso registro) {
+    public void agregarRegistro(RegistroHabito registro) {
         if (registro != null) {
-            // Lógica adicional si es necesaria
+            registro.setHabito(this);
+            this.registros.add(registro);
         }
-        return registro;
     }
     
     /**
@@ -164,8 +176,9 @@ public class Habito {
     }
     
     public boolean tieneMetaDelDia(LocalDate fecha) {
-        return seguimientos.stream()
-                .anyMatch(s -> s.getFecha().equals(fecha) && s.getCompletado() >= metaDiaria);
+        if (metaDiaria == null) return false;
+        return registros.stream()
+                .anyMatch(r -> r.getFecha().equals(fecha) && r.getCompletado() >= metaDiaria);
     }
 
     public int getDiasConsecutivos() {
@@ -181,10 +194,11 @@ public class Habito {
     }
 
     public double getPorcentajeCompletado(LocalDate desde, LocalDate hasta) {
+        if (metaDiaria == null) return 0.0;
         long totalDias = desde.datesUntil(hasta.plusDays(1)).count();
-        long diasCompletados = seguimientos.stream()
-                .filter(s -> !s.getFecha().isBefore(desde) && !s.getFecha().isAfter(hasta))
-                .filter(s -> s.getCompletado() >= metaDiaria)
+        long diasCompletados = registros.stream()
+                .filter(r -> !r.getFecha().isBefore(desde) && !r.getFecha().isAfter(hasta))
+                .filter(r -> r.getCompletado() >= metaDiaria)
                 .count();
         
         return totalDias > 0 ? (diasCompletados * 100.0) / totalDias : 0.0;
