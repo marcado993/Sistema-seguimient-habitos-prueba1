@@ -35,15 +35,29 @@ public class ControladorHabitos extends HttpServlet {
      */
     public Habito registrarCumplimiento(Long habitoId, LocalDate fecha, String observacion) {
         try {
-            Habito habito = habitoDAO.findById(habitoId).orElse(null);
-            
+            // 1) buscarHabito(habitoId)
+            Habito habito = buscarHabito(habitoId);
             if (habito == null) {
+                System.err.println("[ControladorHabitos] registrarCumplimiento: hábito no encontrado id=" + habitoId);
                 return null;
             }
-            
-            // Registrar el cumplimiento del hábito
-            habitoDAO.registrarCompletado(habitoId, fecha, observacion);
-            
+
+            // 2) crear(fechaActual, estado='CUMPLIDO') -> representado creando un RegistroHabito
+            System.out.println("[ControladorHabitos] Crear nuevo registro para habitoId=" + habitoId + " fecha=" + fecha);
+            RegistroHabito nuevoRegistro = crearNuevoRegistro(habito, fecha, observacion);
+
+            // 3) si el registro fue guardado correctamente, se considera agregado al historial
+            if (nuevoRegistro != null && nuevoRegistro.getId() != null) {
+                System.out.println("[ControladorHabitos] Nuevo registro creado id=" + nuevoRegistro.getId());
+            } else {
+                // Fallback: intentar marcar como completado directamente en DAO si la creación de registro falla
+                System.out.println("[ControladorHabitos] No se pudo crear registro, llamando a registrarCompletado DAO como fallback");
+                habitoDAO.registrarCompletado(habitoId, fecha, observacion);
+            }
+
+            // 4) notificarÉxito() / actualizar vista (solo logging aquí)
+            System.out.println("[ControladorHabitos] notificarExito() para habitoId=" + habitoId);
+
             return habito;
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,6 +112,7 @@ public class ControladorHabitos extends HttpServlet {
     public RegistroHabito crearNuevoRegistro(Habito habito, LocalDate fecha, String observacion) {
         try {
             RegistroHabito registro = new RegistroHabito(habito, fecha, 1, observacion);
+            // guarda y retorna el registro (equivale a agregarRegistro(nuevoRegistro) en el diagrama)
             return habitoDAO.saveRegistro(registro);
         } catch (Exception e) {
             e.printStackTrace();

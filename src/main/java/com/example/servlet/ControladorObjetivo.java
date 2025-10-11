@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Controlador de Objetivos según el diagrama de clases
- * Maneja las operaciones relacionadas con objetivos
+ * Controlador de Objetivos siguiendo el diagrama de secuencia.
+ * Flujo: VentanaEstablecerObjetivo -> ControladorObjetivos -> ObjetivoDAO -> Objetivo
  */
 @WebServlet("/controlador-objetivos")
 public class ControladorObjetivo extends HttpServlet {
@@ -28,44 +28,28 @@ public class ControladorObjetivo extends HttpServlet {
     }
     
     /**
-     * Crear un nuevo objetivo
-     * Basado en el diagrama de secuencia
+     * Crea los datos del objetivo (representa <<create>> create(datosObjetivo) en el diagrama)
      */
-    public Objetivo crear(String nombre, String categoria, String frecuencia) {
+    public Objetivo crearDatosObjetivo(String nombre, String categoria, String frecuencia, String usuarioId) {
         Objetivo objetivo = new Objetivo();
         objetivo.setTitulo(nombre);
         objetivo.setDescripcion(categoria);
-        // Configurar frecuencia según sea necesario
-        
+        objetivo.setUsuarioId(usuarioId);
+        // Inicializar otros campos según frecuencia si es necesario
+        objetivo.setProgreso(0);
+        objetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
+        return objetivo;
+    }
+    
+    /**
+     * Persistir el objetivo usando DAO (representa la llamada al DAO en el diagrama)
+     */
+    public Objetivo persistirObjetivo(Objetivo objetivo) {
         return objetivoDAO.save(objetivo);
     }
     
     /**
-     * Actualizar estado de un objetivo
-     */
-    public void actualizarEstado(Long objetivoId, String nuevoEstado) {
-        Objetivo objetivo = objetivoDAO.findById(objetivoId).orElse(null);
-        
-        if (objetivo != null) {
-            try {
-                Objetivo.EstadoObjetivo estado = Objetivo.EstadoObjetivo.valueOf(nuevoEstado.toUpperCase());
-                objetivo.setEstado(estado);
-                objetivoDAO.save(objetivo);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    /**
-     * Crear datos del objetivo
-     */
-    public Objetivo crearDatosObjetivo(String nombre, String categoria, String frecuencia) {
-        return crear(nombre, categoria, frecuencia);
-    }
-    
-    /**
-     * Notificar éxito del registro
+     * Notificar éxito del registro (representa notificarExitoRegistro() en el diagrama)
      */
     public String notificarExitoRegistro(Objetivo nuevoObjetivo) {
         if (nuevoObjetivo != null && nuevoObjetivo.getId() != null) {
@@ -75,20 +59,72 @@ public class ControladorObjetivo extends HttpServlet {
     }
     
     /**
-     * Limpiar formulario
+     * Limpiar el formulario (representa limpiarFormulario() en el diagrama)
      */
     public void limpiarFormulario(HttpServletRequest request) {
-        // Limpiar atributos del request
-        request.removeAttribute("nombre");
-        request.removeAttribute("categoria");
+        request.removeAttribute("titulo");
+        request.removeAttribute("descripcion");
         request.removeAttribute("frecuencia");
     }
     
     /**
-     * Devolver nuevo hábito (retorna el objetivo creado)
+     * Método de alto nivel que implementa la secuencia completa de creación
+     * según el diagrama: recibir datos -> crearDatosObjetivo -> persistir -> notificar -> limpiar
      */
-    public Objetivo devolverNuevoHabito(Objetivo objetivo) {
-        return objetivo;
+    protected void crearObjetivoSequence(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String usuarioId = (String) session.getAttribute("usuarioId");
+        if (usuarioId == null || usuarioId.isEmpty()) usuarioId = "usuario_demo";
+
+        // 1) VentanaEstablecerObjetivo envía datos
+        String titulo = request.getParameter("titulo");
+        String descripcion = request.getParameter("descripcion");
+        String frecuencia = request.getParameter("frecuencia");
+        String fechaInicioStr = request.getParameter("fechaInicio");
+        String fechaFinStr = request.getParameter("fechaFin");
+        String estadoStr = request.getParameter("estado");
+
+        System.out.println("[ControladorObjetivo] iniciar secuencia de creación de objetivo para usuario: " + usuarioId + " titulo=" + titulo);
+
+        // 2) crearDatosObjetivo(nombre, categoria, frecuencia)
+        Objetivo nuevoObjetivo = crearDatosObjetivo(titulo, descripcion, frecuencia, usuarioId);
+
+        // Parsear fechas y estado si vienen
+        try {
+            if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
+                nuevoObjetivo.setFechaCreacion(java.time.LocalDate.parse(fechaInicioStr).atStartOfDay());
+            }
+            if (fechaFinStr != null && !fechaFinStr.isEmpty()) {
+                nuevoObjetivo.setFechaLimite(java.time.LocalDate.parse(fechaFinStr).atStartOfDay());
+            }
+            if (estadoStr != null && !estadoStr.isEmpty()) {
+                try {
+                    nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.valueOf(estadoStr));
+                } catch (IllegalArgumentException ex) {
+                    nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[ControladorObjetivo] Error parseando fechas/estado: " + e.getMessage());
+        }
+
+        // 3) persistirObjetivo -> devuelve objetivoDAO (objetivo persistido)
+        Objetivo objetivoPersistido = persistirObjetivo(nuevoObjetivo);
+        System.out.println("[ControladorObjetivo] objetivoPersistido id=" + (objetivoPersistido != null ? objetivoPersistido.getId() : "null"));
+
+        // 4) notificarExitoRegistro()
+        String mensaje = notificarExitoRegistro(objetivoPersistido);
+        session.setAttribute("mensaje", mensaje);
+
+        // 5) limpiarFormulario()
+        limpiarFormulario(request);
+
+        // 6) preparar vista Planificar Objetivo (según diagrama muestra ventana Planificar Objetivo)
+        List<Objetivo> objetivos = objetivoDAO.findByUsuarioId(usuarioId);
+        request.setAttribute("objetivos", objetivos);
+        request.setAttribute("objetivoRecienCreado", objetivoPersistido != null ? objetivoPersistido.getId() : null);
+
+        request.getRequestDispatcher("/WEB-INF/views/planificarObjetivo.jsp").forward(request, response);
     }
     
     @Override
@@ -135,81 +171,15 @@ public class ControladorObjetivo extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession();
-        String usuarioId = (String) session.getAttribute("usuarioId");
-        
-        if (usuarioId == null || usuarioId.isEmpty()) {
-            usuarioId = "usuario_demo"; // Usuario por defecto
-        }
-        
         String action = request.getParameter("action");
         
         if ("crear".equals(action)) {
-            String titulo = request.getParameter("titulo");
-            String descripcion = request.getParameter("descripcion");
-            String fechaInicioStr = request.getParameter("fechaInicio");
-            String fechaFinStr = request.getParameter("fechaFin");
-            String estadoStr = request.getParameter("estado");
-            
-            System.out.println("📝 Creando objetivo: " + titulo);
-            
-            try {
-                Objetivo nuevoObjetivo = new Objetivo();
-                nuevoObjetivo.setTitulo(titulo);
-                nuevoObjetivo.setDescripcion(descripcion);
-                nuevoObjetivo.setUsuarioId(usuarioId);
-                
-                // Parsear estado
-                if (estadoStr != null && !estadoStr.isEmpty()) {
-                    try {
-                        nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.valueOf(estadoStr));
-                    } catch (IllegalArgumentException e) {
-                        nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
-                    }
-                } else {
-                    nuevoObjetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
-                }
-                
-                nuevoObjetivo.setProgreso(0);
-                
-                // Parsear fechas si existen
-                if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
-                    nuevoObjetivo.setFechaCreacion(java.time.LocalDate.parse(fechaInicioStr).atStartOfDay());
-                }
-                
-                if (fechaFinStr != null && !fechaFinStr.isEmpty()) {
-                    nuevoObjetivo.setFechaLimite(java.time.LocalDate.parse(fechaFinStr).atStartOfDay());
-                }
-                
-                // Guardar objetivo
-                nuevoObjetivo = objetivoDAO.save(nuevoObjetivo);
-                System.out.println("✅ Objetivo guardado con ID: " + nuevoObjetivo.getId());
-                
-                if (nuevoObjetivo != null && nuevoObjetivo.getId() != null) {
-                    String mensaje = notificarExitoRegistro(nuevoObjetivo);
-                    session.setAttribute("mensaje", mensaje);
-                    session.setAttribute("ultimoObjetivoCreado", nuevoObjetivo.getId());
-                    limpiarFormulario(request);
-                    
-                    // Cargar TODOS los objetivos del usuario
-                    List<Objetivo> objetivos = objetivoDAO.findByUsuarioId(usuarioId);
-                    System.out.println("📋 Cargando objetivos para planificar. Total: " + objetivos.size());
-                    
-                    request.setAttribute("objetivos", objetivos);
-                    request.setAttribute("objetivoRecienCreado", nuevoObjetivo.getId());
-                    
-                    // Forward a planificar objetivo
-                    request.getRequestDispatcher("/WEB-INF/views/planificarObjetivo.jsp").forward(request, response);
-                } else {
-                    System.err.println("❌ Error: Objetivo guardado pero ID es null");
-                    response.sendRedirect("controlador-objetivos?action=nuevo&error=save");
-                }
-            } catch (Exception e) {
-                System.err.println("❌ Error al crear objetivo: " + e.getMessage());
-                e.printStackTrace();
-                request.setAttribute("error", "Error al crear el objetivo: " + e.getMessage());
-                request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
-            }
+            // Ejecuta la secuencia de creación según diagrama
+            crearObjetivoSequence(request, response);
+            return;
         }
+        
+        // si no es crear, procesar otras acciones si se requiere
+        doGet(request, response);
     }
 }
