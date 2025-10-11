@@ -19,6 +19,9 @@
 .project
 .classpath
 
+### Smart Tomcat ###
+.smarttomcat/
+
 ### Build ###
 target/
 build/
