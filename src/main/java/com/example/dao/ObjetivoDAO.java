@@ -13,11 +13,11 @@ public class ObjetivoDAO {
     public List<Objetivo> findByUsuarioId(String usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
-            TypedQuery<Objetivo> query = em.createQuery(
-                "SELECT o FROM Objetivo o WHERE o.usuarioId = :usuarioId ORDER BY o.fechaCreacion DESC", 
-                Objetivo.class);
-            query.setParameter("usuarioId", usuarioId);
-            return query.getResultList();
+            return em.createQuery(
+                "FROM Objetivo WHERE usuarioId = ?1 ORDER BY fechaCreacion DESC", 
+                Objetivo.class)
+                .setParameter(1, usuarioId)
+                .getResultList();
         } finally {
             em.close();
         }
