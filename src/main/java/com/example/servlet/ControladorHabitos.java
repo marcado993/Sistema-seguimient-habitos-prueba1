@@ -223,7 +223,7 @@ public class ControladorHabitos extends HttpServlet {
         }
     }
 
-    /**
+/**
      * Procesa la solicitud para registrar el cumplimiento de un hábito para la fecha actual
      * Obtiene el ID del hábito y una observación opcional, llama a la lógica de negocio para
      * crear el registro y redirige al usuario a la lista de hábitos.
@@ -263,6 +263,68 @@ public class ControladorHabitos extends HttpServlet {
         List<Habito> habitos = habitoServicio.listarHabitosUsuario(usuarioId);
         request.setAttribute("habitos", habitos);
         request.getRequestDispatcher("/WEB-INF/views/registroHabito.jsp").forward(request, response);
+    }
+
+
+    private Integer obtenerMetaDiariaOPredeterminada(Habito habito) {
+        return habito.getMetaDiaria() != null ? habito.getMetaDiaria() : 1;
+    }
+
+/**
+     * Procesa la solicitud para registrar el cumplimiento de un hábito con estado específico.
+     * Obtiene los detalles del registro desde los parámetros de la solicitud, crea el registro
+     * con el estado correspondiente (CUMPLIDO, NO_CUMPLIDO, PARCIAL) y redirige al usuario a la
+     * lista de hábitos con un mensaje de éxito o error.
+     * @param request El objeto HttpServletRequest que contiene los detalles del registro.
+     * @param response El objeto HttpServletResponse para la redirección.
+     * @param usuarioId El ID del usuario que realiza el registro.
+     * @throws IOException si ocurre un error durante la redirección.
+     */
+    private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws IOException {
+        String habitoIdStr = request.getParameter("habitoId");
+        String observacion = request.getParameter("observacion");
+        String fechaStr = request.getParameter("fecha");
+        String estado = request.getParameter("estado"); // CUMPLIDO, NO_CUMPLIDO, PARCIAL
+        String estadoAnimo = request.getParameter("estadoAnimo");
+        
+        LocalDate fecha = (fechaStr != null && !fechaStr.isEmpty()) 
+            ? LocalDate.parse(fechaStr) 
+            : LocalDate.now();
+        
+        if (habitoIdStr != null) {
+            Long habitoId = Long.parseLong(habitoIdStr);
+            Habito habito = habitoServicio.buscarHabito(habitoId);
+            
+            if (habito != null) {
+                // Crear el registro con el estado correspondiente
+                RegistroHabito registro = new RegistroHabito();
+                registro.setHabito(habito);
+                registro.setFecha(fecha);
+                registro.setObservacion(observacion);
+                registro.setEstadoAnimo(estadoAnimo);
+                
+
+                // Determinar el valor de "completado" basado en el estado
+                if ("CUMPLIDO".equals(estado)) {
+                    registro.setCompletado(obtenerMetaDiariaOPredeterminada(habito)); // Cumplió la meta
+                } else if ("PARCIAL".equals(estado)) {
+                    registro.setCompletado(obtenerMetaDiariaOPredeterminada(habito) / 2); // Cumplió parcialmente
+                } else { // NO_CUMPLIDO
+                    registro.setCompletado(0); // No cumplió
+                }
+                
+                // Guardar el registro
+                RegistroHabito registroGuardado = habitoServicio.getHabitoDAO().saveRegistro(registro);
+                
+                if (registroGuardado != null) {
+                    response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
+                } else {
+                    response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=register");
+                }
+            } else {
+                response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=notfound");
+            }
+        }
     }
 
     @Override
@@ -366,52 +428,7 @@ public class ControladorHabitos extends HttpServlet {
                 }
                 
             } else if ("registrar".equals(action)) {
-                // Registrar cumplimiento vía POST
-                String habitoIdStr = request.getParameter("habitoId");
-                String observacion = request.getParameter("observacion");
-                String fechaStr = request.getParameter("fecha");
-                String estado = request.getParameter("estado"); // CUMPLIDO, NO_CUMPLIDO, PARCIAL
-                String estadoAnimo = request.getParameter("estadoAnimo");
-                
-                LocalDate fecha = (fechaStr != null && !fechaStr.isEmpty()) 
-                    ? LocalDate.parse(fechaStr) 
-                    : LocalDate.now();
-                
-                if (habitoIdStr != null) {
-                    Long habitoId = Long.parseLong(habitoIdStr);
-                    Habito habito = habitoServicio.buscarHabito(habitoId);
-                    
-                    if (habito != null) {
-                        // Crear el registro con el estado correspondiente
-                        RegistroHabito registro = new RegistroHabito();
-                        registro.setHabito(habito);
-                        registro.setFecha(fecha);
-                        registro.setObservacion(observacion);
-                        registro.setEstadoAnimo(estadoAnimo);
-                        
-                        // Determinar el valor de "completado" basado en el estado
-                        Integer metaDiaria = habito.getMetaDiaria() != null ? habito.getMetaDiaria() : 1;
-                        
-                        if ("CUMPLIDO".equals(estado)) {
-                            registro.setCompletado(metaDiaria); // Cumplió la meta
-                        } else if ("PARCIAL".equals(estado)) {
-                            registro.setCompletado(metaDiaria / 2); // Cumplió parcialmente
-                        } else { // NO_CUMPLIDO
-                            registro.setCompletado(0); // No cumplió
-                        }
-                        
-                        // Guardar el registro
-                        RegistroHabito registroGuardado = habitoServicio.getHabitoDAO().saveRegistro(registro);
-                        
-                        if (registroGuardado != null) {
-                            response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
-                        } else {
-                            response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=register");
-                        }
-                    } else {
-                        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=notfound");
-                    }
-                }
+                procesarRegistroCumplimiento(request, response, usuarioId);
                 
             } else {
                 // Acción no reconocida, redirigir a GET
