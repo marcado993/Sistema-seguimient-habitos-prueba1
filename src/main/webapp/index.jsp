@@ -1,4 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    // Verificar si el usuario está logueado
+    HttpSession currentSession = request.getSession(false);
+    if (currentSession == null || currentSession.getAttribute("usuario") == null) {
+        // Si no está logueado, redirigir al login
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+    
+    // Si está logueado, obtener información del usuario
+    String nombreUsuario = (String) currentSession.getAttribute("nombre");
+    String correoUsuario = (String) currentSession.getAttribute("correo");
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -102,12 +115,62 @@
         .btn-seguimiento:hover {
             background: #FFA5A8;
         }
+        .user-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info .welcome {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .user-info .username {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎯 Sistema de Seguimiento</h1>
         <p class="subtitle">Alcanza tus metas, un hábito a la vez</p>
+        
+        <!-- Información del usuario -->
+        <div class="user-info">
+            <div>
+                <div class="welcome">👋 Bienvenido/a</div>
+                <div class="username"><%= nombreUsuario != null ? nombreUsuario : "Usuario" %></div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 3px;"><%= correoUsuario %></div>
+            </div>
+            <a href="${pageContext.request.contextPath}/logout" class="btn-logout">
+                🚪 Cerrar Sesión
+            </a>
+        </div>
         
         <div style="margin-bottom: 2rem; text-align: center;">
             <h2 style="font-family: 'Poppins', sans-serif; color: #555555; font-size: 20px; margin-bottom: 1rem;">🟢 Gestión de Objetivos</h2>

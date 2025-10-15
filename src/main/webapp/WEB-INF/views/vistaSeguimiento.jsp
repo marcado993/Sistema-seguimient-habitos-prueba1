@@ -121,6 +121,7 @@
             border-left: 5px solid #FFD6A5;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            position: relative;
         }
         
         .habito-card:hover {
@@ -140,6 +141,7 @@
             font-size: 20px;
             font-weight: 600;
             color: #555555;
+            padding-right: 80px;
         }
         
         .habito-racha {
@@ -254,6 +256,50 @@
             margin-bottom: 20px;
             opacity: 0.6;
         }
+        
+        .card-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.6);
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-edit {
+            color: #555555;
+        }
+        
+        .btn-edit:hover {
+            background: #A8E6CF;
+        }
+        
+        .btn-delete {
+            color: #555555;
+        }
+        
+        .btn-delete:hover {
+            background: #FF6B6B;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -312,6 +358,14 @@
                         int rachaActual = habito.calcularRachaActual();
             %>
             <div class="habito-card">
+                <div class="card-actions">
+                    <button class="btn-icon btn-edit" data-id="<%= habito.getId() %>" title="Editar hábito">
+                        ✏️
+                    </button>
+                    <button class="btn-icon btn-delete" data-id="<%= habito.getId() %>" data-nombre="<%= habito.getNombre() %>" title="Eliminar hábito">
+                        🗑️
+                    </button>
+                </div>
                 <div class="habito-header">
                     <div class="habito-nombre"><%= habito.getNombre() %></div>
                     <div class="habito-racha">🔥 Racha: <%= rachaActual %> días</div>
@@ -381,6 +435,29 @@
     </div>
     
     <script>
+        // Event listeners para botones de editar hábito
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.getAttribute('data-id');
+                console.log('✏️ Editando hábito ID: ' + id);
+                window.location.href = '${pageContext.request.contextPath}/controlador-habitos?action=editar&habitoId=' + id;
+            });
+        });
+        
+        // Event listeners para botones de eliminar hábito
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.getAttribute('data-id');
+                const nombre = this.getAttribute('data-nombre');
+                if (confirm('¿Estás seguro de que deseas eliminar el hábito "' + nombre + '"?\n\nSe eliminarán también todos sus registros.')) {
+                    console.log('🗑️ Eliminando hábito ID: ' + id);
+                    window.location.href = '${pageContext.request.contextPath}/controlador-habitos?action=eliminar&habitoId=' + id;
+                }
+            });
+        });
+        
         // Calcular estadísticas
         document.addEventListener('DOMContentLoaded', function() {
             // Aplicar el ancho de las barras de progreso

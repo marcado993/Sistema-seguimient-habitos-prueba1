@@ -148,12 +148,18 @@
     </style>
 </head>
 <body>
+    <%
+        Objetivo objetivo = (Objetivo) request.getAttribute("objetivo");
+        Boolean modoEdicion = (Boolean) request.getAttribute("modoEdicion");
+        boolean esEdicion = (modoEdicion != null && modoEdicion && objetivo != null);
+    %>
+    
     <div class="container">
         <!-- Breadcrumb -->
         <div class="breadcrumb">
             <div class="breadcrumb-item active">
                 <span>📋</span>
-                <span>Paso 1: Establecer Objetivo</span>
+                <span>Paso 1: <%= esEdicion ? "Editar" : "Establecer" %> Objetivo</span>
             </div>
             <span class="breadcrumb-separator">→</span>
             <div class="breadcrumb-item" style="opacity: 0.5;">
@@ -167,52 +173,64 @@
             </div>
         </div>
         
-        <h1>📋 Establecer Objetivo</h1>
+        <h1><%= esEdicion ? "✏️ Editar" : "📋 Establecer" %> Objetivo</h1>
         <p style="text-align: center; color: #888888; margin-bottom: 2rem; font-family: 'Dancing Script', cursive; font-size: 18px;">
-            Define tu meta general para alcanzar
+            <%= esEdicion ? "Modifica los detalles de tu objetivo" : "Define tu meta general para alcanzar" %>
         </p>
         
         <form action="controlador-objetivos" method="post">
-            <input type="hidden" name="action" value="crear">
+            <input type="hidden" name="action" value="<%= esEdicion ? "actualizar" : "crear" %>">
+            <% if (esEdicion) { %>
+            <input type="hidden" name="id" value="<%= objetivo.getId() %>">
+            <% } %>
             
             <div class="form-group">
                 <label for="titulo">Título del Objetivo *</label>
                 <input type="text" id="titulo" name="titulo" required 
+                       value="<%= esEdicion ? objetivo.getTitulo() : "" %>"
                        placeholder="Ej: Perder 5kg en 3 meses">
             </div>
             
             <div class="form-group">
                 <label for="descripcion">Descripción</label>
                 <textarea id="descripcion" name="descripcion" 
-                          placeholder="Describe tu objetivo en detalle..."></textarea>
+                          placeholder="Describe tu objetivo en detalle..."><%= esEdicion && objetivo.getDescripcion() != null ? objetivo.getDescripcion() : "" %></textarea>
             </div>
             
             <div class="form-group">
                 <label for="fechaInicio">Fecha de Inicio *</label>
-                <input type="date" id="fechaInicio" name="fechaInicio" required>
+                <input type="date" id="fechaInicio" name="fechaInicio" required
+                       value="<%= esEdicion && objetivo.getFechaCreacion() != null ? objetivo.getFechaCreacion().toLocalDate() : "" %>">
             </div>
             
             <div class="form-group">
                 <label for="fechaFin">Fecha de Finalización *</label>
-                <input type="date" id="fechaFin" name="fechaFin" required>
+                <input type="date" id="fechaFin" name="fechaFin" required
+                       value="<%= esEdicion && objetivo.getFechaLimite() != null ? objetivo.getFechaLimite().toLocalDate() : "" %>">
             </div>
             
             <div class="form-group">
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado">
-                    <option value="ACTIVO" selected>Activo</option>
-                    <option value="PAUSADO">Pausado</option>
-                    <option value="COMPLETADO">Completado</option>
-                    <option value="CANCELADO">Cancelado</option>
+                    <option value="ACTIVO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.ACTIVO ? "selected" : "" %>>Activo</option>
+                    <option value="PAUSADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.PAUSADO ? "selected" : "" %>>Pausado</option>
+                    <option value="COMPLETADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.COMPLETADO ? "selected" : "" %>>Completado</option>
+                    <option value="CANCELADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.CANCELADO ? "selected" : "" %>>Cancelado</option>
                 </select>
             </div>
             
             <div class="btn-group">
+                <% if (esEdicion) { %>
+                <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/controlador-objetivos?action=planificar'">
+                    ← Cancelar
+                </button>
+                <% } else { %>
                 <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
                     ← Volver al Inicio
                 </button>
+                <% } %>
                 <button type="submit" class="btn-primary">
-                    ✓ Crear Objetivo
+                    ✓ <%= esEdicion ? "Actualizar" : "Crear" %> Objetivo
                 </button>
             </div>
         </form>
@@ -224,14 +242,23 @@
         </div>
     </div>
     
+    <% if (!esEdicion) { %>
     <script>
+        // Solo auto-completar fechas si NO estamos editando
         // Auto-completar fecha de inicio con la fecha actual
-        document.getElementById('fechaInicio').valueAsDate = new Date();
+        const fechaInicio = document.getElementById('fechaInicio');
+        if (!fechaInicio.value) {
+            fechaInicio.valueAsDate = new Date();
+        }
         
         // Auto-completar fecha de fin (30 días después)
-        const fechaFin = new Date();
-        fechaFin.setDate(fechaFin.getDate() + 30);
-        document.getElementById('fechaFin').valueAsDate = fechaFin;
+        const fechaFinInput = document.getElementById('fechaFin');
+        if (!fechaFinInput.value) {
+            const fechaFin = new Date();
+            fechaFin.setDate(fechaFin.getDate() + 30);
+            fechaFinInput.valueAsDate = fechaFin;
+        }
     </script>
+    <% } %>
 </body>
 </html>

@@ -32,11 +32,18 @@
       <version>3.1.0</version>
     </dependency>
 
-    <!-- H2 Database -->
+    <!-- H2 Database (Para desarrollo local) -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>2.2.224</version>
+    </dependency>
+
+    <!-- PostgreSQL Driver (Para Supabase/PostgreSQL) -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.1</version>
     </dependency>
 
     <!-- Servlet API -->

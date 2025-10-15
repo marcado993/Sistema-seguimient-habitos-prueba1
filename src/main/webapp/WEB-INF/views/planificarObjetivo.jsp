@@ -177,6 +177,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 3px solid transparent;
+            position: relative;
         }
         
         .objetivo-card:hover {
@@ -194,6 +195,7 @@
             color: #555555;
             font-size: 20px;
             margin-bottom: 10px;
+            padding-right: 80px;
         }
         
         .objetivo-card p {
@@ -208,6 +210,50 @@
             margin-top: 10px;
             padding-top: 10px;
             border-top: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .card-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.6);
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-edit {
+            color: #555555;
+        }
+        
+        .btn-edit:hover {
+            background: #A8E6CF;
+        }
+        
+        .btn-delete {
+            color: #555555;
+        }
+        
+        .btn-delete:hover {
+            background: #FF6B6B;
+            color: white;
         }
     </style>
 </head>
@@ -251,6 +297,14 @@
                 Long objId = objetivo.getId();
             %>
             <div class="objetivo-card<%= claseExtra %>" data-objetivo-id="<%= objId %>">
+                <div class="card-actions">
+                    <button class="btn-icon btn-edit" data-id="<%= objId %>" title="Editar objetivo">
+                        ✏️
+                    </button>
+                    <button class="btn-icon btn-delete" data-id="<%= objId %>" data-titulo="<%= objetivo.getTitulo() %>" title="Eliminar objetivo">
+                        🗑️
+                    </button>
+                </div>
                 <% if (esNuevo) { %>
                 <div style="background: #A8E6CF; color: #555555; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 10px; display: inline-block;">
                     ✨ Recién creado
@@ -351,6 +405,29 @@
         if (fechaInicioInput) {
             fechaInicioInput.valueAsDate = new Date();
         }
+        
+        // Event listeners para botones de editar
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.getAttribute('data-id');
+                console.log('✏️ Editando objetivo ID: ' + id);
+                window.location.href = '${pageContext.request.contextPath}/controlador-objetivos?action=editar&id=' + id;
+            });
+        });
+        
+        // Event listeners para botones de eliminar
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.getAttribute('data-id');
+                const titulo = this.getAttribute('data-titulo');
+                if (confirm('¿Estás seguro de que deseas eliminar el objetivo "' + titulo + '"?\n\nEsta acción no se puede deshacer.')) {
+                    console.log('🗑️ Eliminando objetivo ID: ' + id);
+                    window.location.href = '${pageContext.request.contextPath}/controlador-objetivos?action=eliminar&id=' + id;
+                }
+            });
+        });
         
         // Agregar event listeners a todas las cards
         document.querySelectorAll('.objetivo-card').forEach(card => {

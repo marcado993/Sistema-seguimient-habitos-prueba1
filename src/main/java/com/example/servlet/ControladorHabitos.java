@@ -148,11 +148,36 @@ public class ControladorHabitos extends HttpServlet {
                 verSeguimiento(request, response, usuarioId);
                 break;
             case "delete":
+            case "eliminar":
                 eliminarHabito(request, response, usuarioId);
+                break;
+            case "editar":
+                editarHabito(request, response, usuarioId);
                 break;
             default:// Por defecto, listar hábitos
                 response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId);
                 break;
+        }
+    }
+    
+    /**
+     * Cargar hábito para editar
+     */
+    private void editarHabito(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws ServletException, IOException {
+        String habitoIdStr = request.getParameter("habitoId");
+        if (habitoIdStr != null) {
+            Long habitoId = Long.parseLong(habitoIdStr);
+            Habito habito = habitoServicio.buscarHabito(habitoId);
+            
+            if (habito != null && habito.getUsuarioId().equals(usuarioId)) {
+                request.setAttribute("habito", habito);
+                request.setAttribute("modoEdicion", true);
+                request.getRequestDispatcher("/WEB-INF/views/registroHabito.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&error=notfound");
+            }
+        } else {
+            response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId);
         }
     }
 
@@ -382,6 +407,47 @@ public class ControladorHabitos extends HttpServlet {
                     response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&success=true");
                 } else {
                     response.sendRedirect("controlador-objetivos?action=nuevo&error=save");
+                }
+                
+            } else if ("actualizar".equals(action)) {
+                // Actualizar hábito existente
+                String habitoIdStr = request.getParameter("habitoId");
+                if (habitoIdStr != null) {
+                    Long habitoId = Long.parseLong(habitoIdStr);
+                    Habito habito = habitoServicio.buscarHabito(habitoId);
+                    
+                    if (habito != null && habito.getUsuarioId().equals(usuarioId)) {
+                        // Actualizar campos
+                        habito.setNombre(request.getParameter("nombre"));
+                        habito.setDescripcion(request.getParameter("descripcion"));
+                        
+                        String frecuenciaStr = request.getParameter("frecuencia");
+                        String metaDiariaStr = request.getParameter("metaDiaria");
+                        String fechaInicioStr = request.getParameter("fechaInicio");
+                        
+                        if (frecuenciaStr != null && !frecuenciaStr.isEmpty()) {
+                            habito.setFrecuencia(Habito.FrecuenciaHabito.valueOf(frecuenciaStr));
+                        }
+                        
+                        if (metaDiariaStr != null && !metaDiariaStr.isEmpty()) {
+                            habito.setMetaDiaria(Integer.parseInt(metaDiariaStr));
+                        }
+                        
+                        if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
+                            habito.setFechaInicio(LocalDate.parse(fechaInicioStr));
+                        }
+                        
+                        Habito habitoGuardado = habitoServicio.guardarHabito(habito);
+                        
+                        if (habitoGuardado != null) {
+                            request.getSession().setAttribute("mensaje", "✅ Hábito actualizado exitosamente");
+                            response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId);
+                        } else {
+                            response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&error=save");
+                        }
+                    } else {
+                        response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&error=permission");
+                    }
                 }
                 
             } else if ("create".equals(action) || "update".equals(action)) {

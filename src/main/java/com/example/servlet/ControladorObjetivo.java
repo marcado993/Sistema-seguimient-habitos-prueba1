@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controlador de Objetivos siguiendo el diagrama de secuencia.
@@ -161,6 +162,54 @@ public class ControladorObjetivo extends HttpServlet {
             // Listar objetivos del usuario
             request.setAttribute("objetivos", objetivoDAO.findByUsuarioId(usuarioId));
             request.getRequestDispatcher("/WEB-INF/views/vistaSeguimiento.jsp").forward(request, response);
+        } else if ("editar".equals(action)) {
+            // Cargar objetivo para editar
+            String objetivoIdStr = request.getParameter("id");
+            if (objetivoIdStr != null) {
+                try {
+                    Long objetivoId = Long.parseLong(objetivoIdStr);
+                    Optional<Objetivo> optObjetivo = objetivoDAO.findById(objetivoId);
+                    if (optObjetivo.isPresent()) {
+                        Objetivo objetivo = optObjetivo.get();
+                        if (objetivo.getUsuarioId().equals(usuarioId)) {
+                            request.setAttribute("objetivo", objetivo);
+                            request.setAttribute("modoEdicion", true);
+                            request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
+                            return;
+                        }
+                    }
+                    session.setAttribute("error", "Objetivo no encontrado o no tienes permiso");
+                    response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=planificar");
+                } catch (Exception e) {
+                    System.err.println("❌ Error al cargar objetivo para editar: " + e.getMessage());
+                    session.setAttribute("error", "Error al cargar objetivo");
+                    response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=planificar");
+                }
+            }
+        } else if ("eliminar".equals(action)) {
+            // Eliminar objetivo
+            String objetivoIdStr = request.getParameter("id");
+            if (objetivoIdStr != null) {
+                try {
+                    Long objetivoId = Long.parseLong(objetivoIdStr);
+                    Optional<Objetivo> optObjetivo = objetivoDAO.findById(objetivoId);
+                    if (optObjetivo.isPresent()) {
+                        Objetivo objetivo = optObjetivo.get();
+                        if (objetivo.getUsuarioId().equals(usuarioId)) {
+                            objetivoDAO.delete(objetivoId);
+                            session.setAttribute("mensaje", "✅ Objetivo eliminado exitosamente");
+                        } else {
+                            session.setAttribute("error", "❌ No tienes permiso para eliminar este objetivo");
+                        }
+                    } else {
+                        session.setAttribute("error", "❌ Objetivo no encontrado");
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ Error al eliminar objetivo: " + e.getMessage());
+                    session.setAttribute("error", "Error al eliminar objetivo");
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=planificar");
         } else {
             // Por defecto, mostrar formulario
             request.getRequestDispatcher("/WEB-INF/views/establecerObjetivo.jsp").forward(request, response);
@@ -172,14 +221,63 @@ public class ControladorObjetivo extends HttpServlet {
             throws ServletException, IOException {
         
         String action = request.getParameter("action");
+        HttpSession session = request.getSession();
+        String usuarioId = (String) session.getAttribute("usuarioId");
+        
+        if (usuarioId == null || usuarioId.isEmpty()) {
+            usuarioId = "usuario_demo";
+        }
         
         if ("crear".equals(action)) {
             // Ejecuta la secuencia de creación según diagrama
             crearObjetivoSequence(request, response);
             return;
+        } else if ("actualizar".equals(action)) {
+            // Actualizar objetivo existente
+            String objetivoIdStr = request.getParameter("id");
+            if (objetivoIdStr != null) {
+                try {
+                    Long objetivoId = Long.parseLong(objetivoIdStr);
+                    Optional<Objetivo> optObjetivo = objetivoDAO.findById(objetivoId);
+                    
+                    if (optObjetivo.isPresent()) {
+                        Objetivo objetivo = optObjetivo.get();
+                        if (objetivo.getUsuarioId().equals(usuarioId)) {
+                            // Actualizar campos
+                            objetivo.setTitulo(request.getParameter("titulo"));
+                            objetivo.setDescripcion(request.getParameter("descripcion"));
+                            
+                            String fechaInicioStr = request.getParameter("fechaInicio");
+                            String fechaFinStr = request.getParameter("fechaFin");
+                            String estadoStr = request.getParameter("estado");
+                            
+                            if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
+                                objetivo.setFechaCreacion(java.time.LocalDate.parse(fechaInicioStr).atStartOfDay());
+                            }
+                            if (fechaFinStr != null && !fechaFinStr.isEmpty()) {
+                                objetivo.setFechaLimite(java.time.LocalDate.parse(fechaFinStr).atStartOfDay());
+                            }
+                            if (estadoStr != null && !estadoStr.isEmpty()) {
+                                objetivo.setEstado(Objetivo.EstadoObjetivo.valueOf(estadoStr));
+                            }
+                            
+                            objetivoDAO.save(objetivo); // save() hace merge si ya existe
+                            session.setAttribute("mensaje", "✅ Objetivo actualizado exitosamente");
+                            response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=planificar");
+                            return;
+                        }
+                    }
+                    session.setAttribute("error", "❌ No tienes permiso para editar este objetivo");
+                } catch (Exception e) {
+                    System.err.println("❌ Error al actualizar objetivo: " + e.getMessage());
+                    session.setAttribute("error", "Error al actualizar objetivo");
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=planificar");
+            return;
         }
         
-        // si no es crear, procesar otras acciones si se requiere
+        // si no es crear ni actualizar, procesar otras acciones si se requiere
         doGet(request, response);
     }
 }
