@@ -306,11 +306,38 @@
             padding: 3rem;
             color: #888888;
         }
+        
+        /* Botón Dashboard Header */
+        .btn-dashboard {
+            padding: 10px 20px;
+            background: #FFB6B9;
+            color: #555555;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-dashboard:hover {
+            background: #FFA5A8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 Registro de Hábito</h1>
+        <!-- Header con botón dashboard -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h1 style="margin: 0;">📝 Registro de Hábito</h1>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn-dashboard">
+                🏠 Dashboard
+            </a>
+        </div>
         
         <form action="controlador-habitos" method="post">
             <input type="hidden" name="action" value="registrar">
@@ -428,8 +455,8 @@
             </div>
             
             <div class="btn-group">
-                <button type="button" class="btn-secondary" onclick="window.history.back()">
-                    ← Cancelar
+                <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
+                    🏠 Volver al Dashboard
                 </button>
                 <button type="submit" class="btn-primary">
                     ✓ Guardar Registro

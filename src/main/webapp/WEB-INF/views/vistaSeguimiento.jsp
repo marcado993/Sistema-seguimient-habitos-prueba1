@@ -300,13 +300,41 @@
             background: #FF6B6B;
             color: white;
         }
+        
+        /* Botón Dashboard Header */
+        .btn-dashboard-top {
+            padding: 10px 20px;
+            background: #FFB6B9;
+            color: #555555;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-dashboard-top:hover {
+            background: #FFA5A8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Vista de Seguimiento</h1>
-            <p class="subtitle">Monitorea tu progreso y mantén tus hábitos al día</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1>📊 Vista de Seguimiento</h1>
+                    <p class="subtitle">Monitorea tu progreso y mantén tus hábitos al día</p>
+                </div>
+                <a href="${pageContext.request.contextPath}/index.jsp" class="btn-dashboard-top">
+                    🏠 Dashboard
+                </a>
+            </div>
         </div>
         
         <div class="stats-grid">
@@ -429,7 +457,7 @@
                 📝 Marcar Cumplimiento Hoy
             </a>
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn" style="background: #FFB6B9; color: #555555;">
-                🏠 Volver al Inicio
+                🏠 Volver al Dashboard
             </a>
         </div>
     </div>

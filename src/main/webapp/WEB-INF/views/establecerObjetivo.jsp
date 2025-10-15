@@ -145,6 +145,27 @@
         .breadcrumb-separator {
             color: #888888;
         }
+        
+        /* Botón Dashboard Header */
+        .btn-dashboard {
+            padding: 8px 16px;
+            background: #FFB6B9;
+            color: #555555;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-dashboard:hover {
+            background: #FFA5A8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -155,6 +176,13 @@
     %>
     
     <div class="container">
+        <!-- Botón Dashboard -->
+        <div style="text-align: right; margin-bottom: 1rem;">
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn-dashboard">
+                🏠 Dashboard
+            </a>
+        </div>
+        
         <!-- Breadcrumb -->
         <div class="breadcrumb">
             <div class="breadcrumb-item active">
@@ -226,7 +254,7 @@
                 </button>
                 <% } else { %>
                 <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
-                    ← Volver al Inicio
+                    🏠 Volver al Dashboard
                 </button>
                 <% } %>
                 <button type="submit" class="btn-primary">

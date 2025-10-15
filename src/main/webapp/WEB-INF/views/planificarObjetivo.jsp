@@ -255,11 +255,36 @@
             background: #FF6B6B;
             color: white;
         }
+        
+        /* Botón Dashboard Header */
+        .btn-dashboard {
+            padding: 10px 20px;
+            background: #FFB6B9;
+            color: #555555;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-dashboard:hover {
+            background: #FFA5A8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Planificar Objetivo</h1>
+        <!-- Header con botón de retorno -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h1 style="margin: 0;">🎯 Planificar Objetivo</h1>
+            <button onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'" class="btn-dashboard">
+                🏠 Dashboard
+            </button>
+        </div>
         
         <%
             List<Objetivo> objetivos = (List<Objetivo>) request.getAttribute("objetivos");
@@ -388,7 +413,7 @@
             
             <div class="btn-group">
                 <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
-                    ← Volver al Inicio
+                    🏠 Volver al Dashboard
                 </button>
                 <button type="submit" class="btn-primary" id="btn-guardar" disabled>
                     ✓ Crear Hábito y Asociar
