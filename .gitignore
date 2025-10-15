@@ -4,6 +4,7 @@
 *.7z
 *.tar
 *.gz
+*.sql
 
 # Archivos Markdown (documentación local)
 *.md

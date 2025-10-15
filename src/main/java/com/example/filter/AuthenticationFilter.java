@@ -13,14 +13,10 @@ import java.io.IOException;
  * Redirige a login si el usuario no está autenticado
  */
 @WebFilter(filterName = "AuthenticationFilter", urlPatterns = {
-    "/establecerObjetivo",
-    "/planificarObjetivo",
-    "/registroHabito",
-    "/vistaSeguimiento",
-    "/WEB-INF/views/establecerObjetivo.jsp",
-    "/WEB-INF/views/planificarObjetivo.jsp",
-    "/WEB-INF/views/registroHabito.jsp",
-    "/WEB-INF/views/vistaSeguimiento.jsp"
+    "/index.jsp",
+    "/controlador-objetivos",
+    "/controlador-habitos",
+    "/planificar"
 })
 public class AuthenticationFilter implements Filter {
 

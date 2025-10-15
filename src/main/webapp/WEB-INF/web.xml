@@ -19,6 +19,14 @@
     <session-timeout>30</session-timeout>
   </session-config>
 
+  <!-- ============================================ -->
+  <!-- NOTA: Los servlets usan anotaciones @WebServlet -->
+  <!-- ControladorLogin maneja: /login, /logout, /registro -->
+  <!-- ControladorObjetivo maneja: /controlador-objetivos -->
+  <!-- ControladorHabitos maneja: /controlador-habitos -->
+  <!-- ControladorPlanificarObjetivo maneja: /controlador-planificar -->
+  <!-- ============================================ -->
+
   <!-- Páginas de error -->
   <error-page>
     <error-code>404</error-code>
