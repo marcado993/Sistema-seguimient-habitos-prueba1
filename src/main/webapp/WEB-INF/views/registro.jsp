@@ -13,8 +13,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #E9F7EF;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -44,8 +44,8 @@
         }
 
         .registro-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #FFD6A5 0%, #F3E8FF 100%);
+            color: #555555;
             padding: 30px;
             text-align: center;
         }
@@ -53,11 +53,13 @@
         .registro-header h1 {
             font-size: 28px;
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .registro-header p {
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.85;
+            color: #555555;
         }
 
         .registro-body {
@@ -79,23 +81,25 @@
         .form-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #F3E8FF;
             border-radius: 10px;
             font-size: 15px;
             transition: all 0.3s ease;
+            background: #F3E8FF;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #FFD6A5;
+            box-shadow: 0 0 0 3px rgba(255, 214, 165, 0.2);
+            background: white;
         }
 
         .btn-registro {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #FFD6A5;
+            color: #555555;
             border: none;
             border-radius: 10px;
             font-size: 16px;
@@ -107,7 +111,8 @@
 
         .btn-registro:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(255, 214, 165, 0.4);
+            background: #FFC78C;
         }
 
         .btn-registro:active {
@@ -135,14 +140,14 @@
         }
 
         .login-link a {
-            color: #667eea;
+            color: #FFD6A5;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: color 0.3s ease;
         }
 
         .login-link a:hover {
-            color: #764ba2;
+            color: #A8E6CF;
             text-decoration: underline;
         }
 
