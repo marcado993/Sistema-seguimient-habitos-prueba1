@@ -1,8 +1,8 @@
-package com.example.services;
+package com.sistema_seguimiento.services;
 
-import com.example.dao.HabitoDAO;
-import com.example.model.Habito;
-import com.example.model.RegistroHabito;
+import com.sistema_seguimiento.dao.HabitoDAO;
+import com.sistema_seguimiento.model.Habito;
+import com.sistema_seguimiento.model.RegistroHabito;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;

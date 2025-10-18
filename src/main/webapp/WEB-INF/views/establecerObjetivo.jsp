@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.example.model.Objetivo" %>
+<%@ page import="com.sistema_seguimiento.model.Objetivo" %>
 <!DOCTYPE html>
 <html>
 <head>

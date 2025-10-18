@@ -1,8 +1,8 @@
-package com.example.servlet;
+package com.sistema_seguimiento.servlet;
 
-import com.example.dao.ObjetivoDAO;
-import com.example.model.Objetivo;
-import com.example.model.RegistroProgreso;
+import com.sistema_seguimiento.dao.ObjetivoDAO;
+import com.sistema_seguimiento.model.Objetivo;
+import com.sistema_seguimiento.model.RegistroProgreso;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

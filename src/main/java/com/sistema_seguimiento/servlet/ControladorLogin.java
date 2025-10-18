@@ -1,7 +1,7 @@
-package com.example.servlet;
+package com.sistema_seguimiento.servlet;
 
-import com.example.dao.UsuarioDAOJPA;
-import com.example.model.Usuario;
+import com.sistema_seguimiento.dao.UsuarioDAOJPA;
+import com.sistema_seguimiento.model.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

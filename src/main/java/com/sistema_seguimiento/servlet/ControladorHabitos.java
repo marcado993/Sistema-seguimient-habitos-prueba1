@@ -1,9 +1,9 @@
-package com.example.servlet;
+package com.sistema_seguimiento.servlet;
 
-import com.example.dao.HabitoDAO;
-import com.example.model.Habito;
-import com.example.model.RegistroHabito;
-import com.example.services.HabitoServicio;
+import com.sistema_seguimiento.dao.HabitoDAO;
+import com.sistema_seguimiento.model.Habito;
+import com.sistema_seguimiento.model.RegistroHabito;
+import com.sistema_seguimiento.services.HabitoServicio;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -422,8 +422,8 @@ public class ControladorHabitos extends HttpServlet {
                 // Asociar con objetivo si se proporciona
                 if (objetivoIdStr != null && !objetivoIdStr.isEmpty()) {
                     Long objetivoId = Long.parseLong(objetivoIdStr);
-                    com.example.dao.ObjetivoDAO objetivoDAO = new com.example.dao.ObjetivoDAO();
-                    com.example.model.Objetivo objetivo = objetivoDAO.findById(objetivoId).orElse(null);
+                    com.sistema_seguimiento.dao.ObjetivoDAO objetivoDAO = new com.sistema_seguimiento.dao.ObjetivoDAO();
+                    com.sistema_seguimiento.model.Objetivo objetivo = objetivoDAO.findById(objetivoId).orElse(null);
                     if (objetivo != null) {
                         habito.setObjetivo(objetivo);
                     }

@@ -1,4 +1,4 @@
-package com.example.dao;
+package com.sistema_seguimiento.dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

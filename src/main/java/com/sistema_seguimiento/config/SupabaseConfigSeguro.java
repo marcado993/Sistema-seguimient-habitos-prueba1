@@ -1,4 +1,4 @@
-package com.example.config;
+package com.sistema_seguimiento.config;
 
 /**
  * Configuración SEGURA de Supabase

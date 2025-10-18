@@ -1,4 +1,4 @@
-package com.example.model;
+package com.sistema_seguimiento.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

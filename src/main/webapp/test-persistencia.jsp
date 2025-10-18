@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.example.dao.ObjetivoDAO" %>
-<%@ page import="com.example.dao.HabitoDAO" %>
-<%@ page import="com.example.model.Objetivo" %>
-<%@ page import="com.example.model.Habito" %>
+<%@ page import="com.sistema_seguimiento.dao.ObjetivoDAO" %>
+<%@ page import="com.sistema_seguimiento.dao.HabitoDAO" %>
+<%@ page import="com.sistema_seguimiento.model.Objetivo" %>
+<%@ page import="com.sistema_seguimiento.model.Habito" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.LocalDateTime" %>
 <%@ page import="java.util.List" %>

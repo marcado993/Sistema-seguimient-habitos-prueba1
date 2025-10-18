@@ -1,4 +1,4 @@
-package com.example.filter;
+package com.sistema_seguimiento.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;

@@ -1,7 +1,7 @@
-package com.example.dao;
+package com.sistema_seguimiento.dao;
 
-import com.example.model.Habito;
-import com.example.model.RegistroHabito;
+import com.sistema_seguimiento.model.Habito;
+import com.sistema_seguimiento.model.RegistroHabito;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
