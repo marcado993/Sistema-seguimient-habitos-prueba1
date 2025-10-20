@@ -1,21 +1,33 @@
-# Archivos y carpetas de Maven
-/target/
-!.mvn/wrapper/maven-wrapper.jar
+# Archivos comprimidos
+*.rar
+*.zip
+*.7z
+*.tar
+*.gz
+*.sql
 
-# Archivos de configuración de IDEs
-*.iml
+# Archivos Markdown (documentación local)
+*.md
+
+### IntelliJ IDEA ###
 .idea/
-*.classpath
-*.project
-*.settings/
+*.iws
+*.iml
+*.ipr
+*.vscode/
 
-# Archivos de sistema operativo
+### Eclipse ###
+.settings/
+.project
+.classpath
+
+### Smart Tomcat ###
+.smarttomcat/
+
+### Build ###
+target/
+build/
+
+### OS ###
 .DS_Store
 Thumbs.db
-
-# Archivos de log y temporales
-*.log
-*.tmp
-
-# Archivos de configuración personal
-*.env
