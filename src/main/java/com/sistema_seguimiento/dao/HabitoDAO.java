@@ -9,7 +9,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class HabitoDAO {
+/**
+ * DAO para gestión de Hábitos
+ * 
+ * Refactorizado para usar BaseDAO y eliminar código repetitivo
+ * de gestión de transacciones.
+ */
+public class HabitoDAO extends BaseDAO {
 
     public List<Habito> findByUsuarioId(String usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();

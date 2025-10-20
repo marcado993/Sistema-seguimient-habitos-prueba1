@@ -327,6 +327,169 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
         }
+        
+        /* Estilos del Pomodoro Timer */
+        .pomodoro-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .pomodoro-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .pomodoro-title {
+            font-family: 'Poppins', sans-serif;
+            color: #555555;
+            font-weight: 600;
+            font-size: 24px;
+        }
+        
+        .timer-display {
+            font-family: 'Poppins', sans-serif;
+            font-size: 72px;
+            font-weight: 700;
+            color: #555555;
+            margin: 2rem 0;
+            letter-spacing: 3px;
+        }
+        
+        .timer-state {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .state-trabajo {
+            background: #FFD6A5;
+            color: #555555;
+        }
+        
+        .state-descanso {
+            background: #A8E6CF;
+            color: #555555;
+        }
+        
+        .state-descanso-largo {
+            background: #FFB6B9;
+            color: #555555;
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-timer {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+        
+        .btn-start {
+            background: #A8E6CF;
+            color: #555555;
+        }
+        
+        .btn-start:hover {
+            background: #90E0BC;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 230, 207, 0.4);
+        }
+        
+        .btn-pause {
+            background: #FFD6A5;
+            color: #555555;
+        }
+        
+        .btn-pause:hover {
+            background: #FFC78C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 214, 165, 0.4);
+        }
+        
+        .btn-reset {
+            background: #FFB6B9;
+            color: #555555;
+        }
+        
+        .btn-reset:hover {
+            background: #FFA5A8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 185, 0.4);
+        }
+        
+        .btn-timer:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .pomodoro-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .pomodoro-stat {
+            text-align: center;
+        }
+        
+        .pomodoro-stat-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFD6A5;
+        }
+        
+        .pomodoro-stat-label {
+            font-size: 12px;
+            color: #888888;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .timer-progress {
+            width: 100%;
+            max-width: 500px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            margin: 0 auto 2rem;
+            overflow: hidden;
+        }
+        
+        .timer-progress-bar {
+            height: 100%;
+            background: #A8E6CF;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -414,6 +577,53 @@
                                 <div class="estado-content">Parcial</div>
                             </label>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pomodoro Timer Section -->
+            <div class="pomodoro-section">
+                <div class="pomodoro-header">
+                    <span style="font-size: 32px;">🍅</span>
+                    <h2 class="pomodoro-title">Temporizador Pomodoro</h2>
+                </div>
+                
+                <div class="timer-state state-trabajo" id="timerState">
+                    ⚡ TRABAJO
+                </div>
+                
+                <div class="timer-progress">
+                    <div class="timer-progress-bar" id="timerProgressBar" style="width: 100%;"></div>
+                </div>
+                
+                <div class="timer-display" id="timerDisplay">
+                    25:00
+                </div>
+                
+                <div class="timer-controls">
+                    <button type="button" class="btn-timer btn-start" id="btnStart" onclick="startTimer()">
+                        ▶️ Iniciar
+                    </button>
+                    <button type="button" class="btn-timer btn-pause" id="btnPause" onclick="pauseTimer()" disabled>
+                        ⏸️ Pausar
+                    </button>
+                    <button type="button" class="btn-timer btn-reset" id="btnReset" onclick="resetTimer()">
+                        🔄 Reiniciar
+                    </button>
+                </div>
+                
+                <div class="pomodoro-stats">
+                    <div class="pomodoro-stat">
+                        <div class="pomodoro-stat-value" id="pomodorosCompletados">0</div>
+                        <div class="pomodoro-stat-label">🍅 Pomodoros</div>
+                    </div>
+                    <div class="pomodoro-stat">
+                        <div class="pomodoro-stat-value" id="tiempoTotal">0h 0m</div>
+                        <div class="pomodoro-stat-label">⏱️ Tiempo Total</div>
+                    </div>
+                    <div class="pomodoro-stat">
+                        <div class="pomodoro-stat-value" id="cicloActual">1/4</div>
+                        <div class="pomodoro-stat-label">🔄 Ciclo</div>
                     </div>
                 </div>
             </div>
@@ -532,6 +742,178 @@
                 alert('⚠️ Por favor, selecciona un hábito antes de continuar');
                 document.getElementById('searchHabito').focus();
                 return false;
+            }
+        });
+        
+        // ==================== POMODORO TIMER ====================
+        
+        // Estados del Pomodoro
+        const Estados = {
+            TRABAJO: { nombre: 'TRABAJO', tiempo: 25 * 60, emoji: '⚡', clase: 'state-trabajo', color: '#A8E6CF' },
+            DESCANSO_CORTO: { nombre: 'DESCANSO CORTO', tiempo: 5 * 60, emoji: '☕', clase: 'state-descanso', color: '#A8E6CF' },
+            DESCANSO_LARGO: { nombre: 'DESCANSO LARGO', tiempo: 15 * 60, emoji: '🎉', clase: 'state-descanso-largo', color: '#FFB6B9' }
+        };
+        
+        // Variables globales del timer
+        let tiempoRestante = Estados.TRABAJO.tiempo;
+        let tiempoTotal = Estados.TRABAJO.tiempo;
+        let estadoActual = Estados.TRABAJO;
+        let timerInterval = null;
+        let isRunning = false;
+        let pomodorosCompletados = 0;
+        let tiempoTotalTrabajado = 0; // en segundos
+        let cicloActual = 1;
+        
+        // Elementos del DOM
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerState = document.getElementById('timerState');
+        const timerProgressBar = document.getElementById('timerProgressBar');
+        const btnStart = document.getElementById('btnStart');
+        const btnPause = document.getElementById('btnPause');
+        const btnReset = document.getElementById('btnReset');
+        const pomodorosDisplay = document.getElementById('pomodorosCompletados');
+        const tiempoTotalDisplay = document.getElementById('tiempoTotal');
+        const cicloActualDisplay = document.getElementById('cicloActual');
+        
+        // Función para formatear tiempo MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+        }
+        
+        // Función para actualizar la visualización
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(tiempoRestante);
+            
+            // Actualizar barra de progreso
+            const progreso = ((tiempoTotal - tiempoRestante) / tiempoTotal) * 100;
+            timerProgressBar.style.width = progreso + '%';
+            timerProgressBar.style.background = estadoActual.color;
+            
+            // Actualizar estado
+            timerState.textContent = estadoActual.emoji + ' ' + estadoActual.nombre;
+            timerState.className = 'timer-state ' + estadoActual.clase;
+            
+            // Actualizar estadísticas
+            pomodorosDisplay.textContent = pomodorosCompletados;
+            const horas = Math.floor(tiempoTotalTrabajado / 3600);
+            const minutos = Math.floor((tiempoTotalTrabajado % 3600) / 60);
+            tiempoTotalDisplay.textContent = horas + 'h ' + minutos + 'm';
+            cicloActualDisplay.textContent = cicloActual + '/4';
+        }
+        
+        // Función para cambiar de estado
+        function cambiarEstado() {
+            if (estadoActual === Estados.TRABAJO) {
+                pomodorosCompletados++;
+                tiempoTotalTrabajado += Estados.TRABAJO.tiempo;
+                
+                // Después de 4 pomodoros, descanso largo
+                if (pomodorosCompletados % 4 === 0) {
+                    estadoActual = Estados.DESCANSO_LARGO;
+                    cicloActual = 1; // Reiniciar ciclo
+                } else {
+                    estadoActual = Estados.DESCANSO_CORTO;
+                    cicloActual++;
+                }
+            } else {
+                // Volver a trabajo después de cualquier descanso
+                estadoActual = Estados.TRABAJO;
+            }
+            
+            tiempoRestante = estadoActual.tiempo;
+            tiempoTotal = estadoActual.tiempo;
+            updateDisplay();
+            
+            // Mostrar notificación
+            if (Notification.permission === "granted") {
+                new Notification("Pomodoro - " + estadoActual.nombre, {
+                    body: "Es hora de " + (estadoActual === Estados.TRABAJO ? "trabajar" : "descansar"),
+                    icon: "🍅"
+                });
+            }
+        }
+        
+        // Función principal del timer
+        function tick() {
+            if (tiempoRestante > 0) {
+                tiempoRestante--;
+                updateDisplay();
+            } else {
+                // Timer completado
+                pauseTimer();
+                cambiarEstado();
+            }
+        }
+        
+        // Iniciar timer
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timerInterval = setInterval(tick, 1000);
+                
+                btnStart.disabled = true;
+                btnPause.disabled = false;
+                
+                // Solicitar permiso para notificaciones
+                if (Notification.permission === "default") {
+                    Notification.requestPermission();
+                }
+            }
+        }
+        
+        // Pausar timer
+        function pauseTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timerInterval);
+                timerInterval = null;
+                
+                btnStart.disabled = false;
+                btnPause.disabled = true;
+                
+                btnStart.innerHTML = '▶️ Continuar';
+            }
+        }
+        
+        // Reiniciar timer
+        function resetTimer() {
+            pauseTimer();
+            
+            // Volver al estado de trabajo
+            estadoActual = Estados.TRABAJO;
+            tiempoRestante = Estados.TRABAJO.tiempo;
+            tiempoTotal = Estados.TRABAJO.tiempo;
+            
+            updateDisplay();
+            
+            btnStart.innerHTML = '▶️ Iniciar';
+            btnStart.disabled = false;
+            btnPause.disabled = true;
+        }
+        
+        // Inicializar display
+        updateDisplay();
+        
+        // Guardar estado en localStorage
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('pomodoroState', JSON.stringify({
+                pomodorosCompletados: pomodorosCompletados,
+                tiempoTotalTrabajado: tiempoTotalTrabajado,
+                cicloActual: cicloActual
+            }));
+        });
+        
+        // Recuperar estado desde localStorage
+        window.addEventListener('load', function() {
+            const savedState = localStorage.getItem('pomodoroState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                pomodorosCompletados = state.pomodorosCompletados || 0;
+                tiempoTotalTrabajado = state.tiempoTotalTrabajado || 0;
+                cicloActual = state.cicloActual || 1;
+                updateDisplay();
             }
         });
     </script>
