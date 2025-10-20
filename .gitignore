@@ -1,33 +1,11 @@
-# Archivos comprimidos
-*.rar
-*.zip
-*.7z
-*.tar
-*.gz
-*.sql
+# Ignore everything by default
+*
+*/
 
-# Archivos Markdown (documentación local)
-*.md
+# Except for src and pom.xml
+!src/
+!pom.xml
+!.gitignore
 
-### IntelliJ IDEA ###
-.idea/
-*.iws
-*.iml
-*.ipr
-*.vscode/
-
-### Eclipse ###
-.settings/
-.project
-.classpath
-
-### Smart Tomcat ###
-.smarttomcat/
-
-### Build ###
-target/
-build/
-
-### OS ###
-.DS_Store
-Thumbs.db
+# Keep directory structure for src
+!src/**
