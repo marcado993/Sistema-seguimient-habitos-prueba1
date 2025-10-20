@@ -1,0 +1,33 @@
+# Archivos comprimidos
+*.rar
+*.zip
+*.7z
+*.tar
+*.gz
+*.sql
+
+# Archivos Markdown (documentación local)
+*.md
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+*.vscode/
+
+### Eclipse ###
+.settings/
+.project
+.classpath
+
+### Smart Tomcat ###
+.smarttomcat/
+
+### Build ###
+target/
+build/
+
+### OS ###
+.DS_Store
+Thumbs.db
