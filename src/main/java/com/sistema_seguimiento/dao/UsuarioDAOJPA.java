@@ -45,7 +45,7 @@ public class UsuarioDAOJPA {
     /**
      * Buscar usuario por ID
      */
-    public Optional<Usuario> findById(Long id) {
+    public Optional<Usuario> findById(Integer id) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         
         try {
@@ -134,7 +134,7 @@ public class UsuarioDAOJPA {
     /**
      * Eliminar usuario por ID
      */
-    public boolean delete(Long id) {
+    public boolean delete(Integer id) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction transaction = null;
         

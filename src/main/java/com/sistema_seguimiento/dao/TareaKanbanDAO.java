@@ -9,46 +9,43 @@ import java.util.Optional;
 public class TareaKanbanDAO {
 
     public TareaKanban save(TareaKanban tarea) {
-        EntityManager em = EntityManagerUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-
-        try {
-            tx.begin();
-            if (tarea.getId() == null){
-                em.persist(tarea);
-            }else {
-                tarea = em.merge(tarea);
-            }
-            tx.commit();
-            return tarea;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw new RuntimeException("Error al guardar la tarea Kanban",e);
-        }finally {
-            em.close();
-        }
-
+        executeWithTransaction(em ->{
+           if (tarea.getId() == null){
+               em.persist(tarea);
+           }else {
+               em.merge(tarea);
+           }
+        });
+        return tarea;
     }
 
-    public void delete(Long id) {
+    private void executeWithTransaction(java.util.function.Consumer<EntityManager> operation) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Optional<TareaKanban> tareaOpt = findById(id);
-            if (tareaOpt.isPresent()) {
-                em.remove(em.merge(tareaOpt.get())); // Merge para re-adjuntar la entidad antes de remover
-            }
+            operation.accept(em);
             tx.commit();
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw new RuntimeException("Error al eliminar la tarea Kanban", e);
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Error en la transacción del TareaKanbanDAO", e);
         } finally {
             em.close();
         }
     }
 
-    public Optional<TareaKanban> findById(Long id) {
+    public void delete(Integer id) {
+        executeWithTransaction(em -> { // Usamos el mismo helper
+            Optional<TareaKanban> tareaOpt = findById(id);
+            if (tareaOpt.isPresent()) {
+                em.remove(em.merge(tareaOpt.get()));
+            }
+        });
+    }
+
+    public Optional<TareaKanban> findById(Integer id) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TareaKanban tarea = em.find(TareaKanban.class, id);

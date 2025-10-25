@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "habitos")
+@Table(name = "habito")
 public class Habito {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "nombre", nullable = false, length = 200)
     private String nombre;
@@ -34,21 +34,31 @@ public class Habito {
     private LocalDateTime fechaCreacion;
     
     @Column(name = "usuario_id")
-    private String usuarioId;
+    private Integer usuarioId;
+    
+    @Column(name = "objetivo_relacionado_id")
+    private Integer objetivoRelacionadoId;
+    
+    @Column(name = "racha_actual")
+    private Integer rachaActual;
+    
+    @Column(name = "racha_maxima")
+    private Integer rachaMaxima;
     
     @Column(name = "activo")
     private Boolean activo = true;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "objetivo_id")
-    private Objetivo objetivo;
+    @Column(name = "estado_animo")
+    private String estadoAnimo = "neutral";  // ✅ NUEVO: feliz, triste, neutral, etc.
     
     @OneToMany(mappedBy = "habito", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RegistroHabito> registros = new ArrayList<>();
 
     // Enum para la frecuencia del hábito
     public enum FrecuenciaHabito {
-        DIARIO, SEMANAL, MENSUAL
+        DIARIA,    // Mayúsculas y terminación en 'A' para coincidir con BD
+        SEMANAL,   // Mayúsculas y terminación en 'AL' para coincidir con BD
+        MENSUAL    // Mayúsculas y terminación en 'AL' para coincidir con BD
     }
 
     // Constructores
@@ -56,9 +66,11 @@ public class Habito {
         this.fechaCreacion = LocalDateTime.now();
         this.fechaInicio = LocalDate.now();
         this.activo = true;
+        this.rachaActual = 0;
+        this.rachaMaxima = 0;
     }
 
-    public Habito(String nombre, String descripcion, FrecuenciaHabito frecuencia, Integer metaDiaria, String usuarioId) {
+    public Habito(String nombre, String descripcion, FrecuenciaHabito frecuencia, Integer metaDiaria, Integer usuarioId) {
         this();
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -68,11 +80,11 @@ public class Habito {
     }
 
     // Getters y Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -125,11 +137,43 @@ public class Habito {
     }
 
     public String getUsuarioId() {
-        return usuarioId;
+        return usuarioId != null ? usuarioId.toString() : null;
     }
 
-    public void setUsuarioId(String usuarioId) {
+    public void setUsuarioId(Integer usuarioId) {
         this.usuarioId = usuarioId;
+    }
+    
+    public Integer getObjetivoRelacionadoId() {
+        return objetivoRelacionadoId;
+    }
+
+    public void setObjetivoRelacionadoId(Integer objetivoRelacionadoId) {
+        this.objetivoRelacionadoId = objetivoRelacionadoId;
+    }
+    
+    public Integer getRachaActual() {
+        return rachaActual;
+    }
+
+    public void setRachaActual(Integer rachaActual) {
+        this.rachaActual = rachaActual;
+    }
+    
+    public Integer getRachaMaxima() {
+        return rachaMaxima;
+    }
+
+    public void setRachaMaxima(Integer rachaMaxima) {
+        this.rachaMaxima = rachaMaxima;
+    }
+    
+    public String getEstadoAnimo() {  // ✅ NUEVO getter
+        return estadoAnimo;
+    }
+    
+    public void setEstadoAnimo(String estadoAnimo) {  // ✅ NUEVO setter
+        this.estadoAnimo = estadoAnimo;
     }
 
     public Boolean getActivo() {
@@ -148,14 +192,6 @@ public class Habito {
         this.registros = registros;
     }
     
-    public Objetivo getObjetivo() {
-        return objetivo;
-    }
-
-    public void setObjetivo(Objetivo objetivo) {
-        this.objetivo = objetivo;
-    }
-
     // Métodos de utilidad
     
     /**
@@ -178,7 +214,11 @@ public class Habito {
     public boolean tieneMetaDelDia(LocalDate fecha) {
         if (metaDiaria == null) return false;
         return registros.stream()
-                .anyMatch(r -> r.getFecha().equals(fecha) && r.getCompletado() >= metaDiaria);
+                .anyMatch(r -> r.getFecha().equals(fecha) 
+                    && r.getCompletado() != null 
+                    && r.getCompletado()  // ✅ Boolean
+                    && r.getVecesRealizado() != null 
+                    && r.getVecesRealizado() >= metaDiaria);  // ✅ Usar vecesRealizado
     }
 
     public int getDiasConsecutivos() {
@@ -198,7 +238,10 @@ public class Habito {
         long totalDias = desde.datesUntil(hasta.plusDays(1)).count();
         long diasCompletados = registros.stream()
                 .filter(r -> !r.getFecha().isBefore(desde) && !r.getFecha().isAfter(hasta))
-                .filter(r -> r.getCompletado() >= metaDiaria)
+                .filter(r -> r.getCompletado() != null 
+                    && r.getCompletado()  // ✅ Boolean
+                    && r.getVecesRealizado() != null 
+                    && r.getVecesRealizado() >= metaDiaria)  // ✅ Usar vecesRealizado
                 .count();
         
         return totalDias > 0 ? (diasCompletados * 100.0) / totalDias : 0.0;

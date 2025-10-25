@@ -89,17 +89,16 @@ public class ObjetivoDAODeleteTest {
         Objetivo objetivoAEliminar = new Objetivo();
         objetivoAEliminar.setTitulo("Objetivo a eliminar");
         objetivoAEliminar.setDescripcion("Este objetivo será eliminado permanentemente");
-        objetivoAEliminar.setEstado(EstadoObjetivo.ACTIVO);
-        objetivoAEliminar.setProgreso(50);
-        objetivoAEliminar.setUsuarioId("user456");
+        objetivoAEliminar.setEstado(EstadoObjetivo.EN_PROGRESO);
+        objetivoAEliminar.setProgresoActual(50);
+        objetivoAEliminar.setUsuarioId(2);
         objetivoAEliminar.setFechaCreacion(LocalDateTime.now());
-        objetivoAEliminar.setFechaLimite(LocalDateTime.now().plusDays(15));
         
         em.getTransaction().begin();
         em.persist(objetivoAEliminar);
         em.getTransaction().commit();
         
-        Long objetivoId = objetivoAEliminar.getId();
+        Integer objetivoId = objetivoAEliminar.getId();
         assertNotNull("El objetivo debe tener un ID después de persistir", objetivoId);
         System.out.println("✅ Objetivo creado con ID: " + objetivoId);
         
@@ -148,7 +147,7 @@ public class ObjetivoDAODeleteTest {
     public void testEliminarObjetivoInexistente() {
         System.out.println("\n🧪 Test: Eliminar objetivo inexistente");
         
-        Long objetivoIdInexistente = 88888L;
+        Integer objetivoIdInexistente = 88888;
         
         try {
             // ACT - Intentar eliminar objetivo que no existe
@@ -174,16 +173,16 @@ public class ObjetivoDAODeleteTest {
         Objetivo objetivo = new Objetivo();
         objetivo.setTitulo("Objetivo con historial");
         objetivo.setDescripcion("Tiene registros de progreso");
-        objetivo.setEstado(EstadoObjetivo.ACTIVO);
-        objetivo.setProgreso(40);
-        objetivo.setUsuarioId("user789");
+        objetivo.setEstado(EstadoObjetivo.EN_PROGRESO);
+        objetivo.setProgresoActual(40);
+        objetivo.setUsuarioId(3);
         objetivo.setFechaCreacion(LocalDateTime.now());
         
         em.getTransaction().begin();
         em.persist(objetivo);
         em.getTransaction().commit();
         
-        Long objetivoId = objetivo.getId();
+        Integer objetivoId = objetivo.getId();
         
         // Crear registros de progreso asociados
         objetivoDAO.actualizarProgreso(objetivoId, 60, "Primera actualización");

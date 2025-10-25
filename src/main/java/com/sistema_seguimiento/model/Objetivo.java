@@ -1,17 +1,18 @@
 package com.sistema_seguimiento.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "objetivos")
+@Table(name = "objetivo")
 public class Objetivo {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "titulo", nullable = false, length = 200)
     private String titulo;
@@ -23,49 +24,57 @@ public class Objetivo {
     @Column(name = "estado")
     private EstadoObjetivo estado;
     
+    @Column(name = "fecha_inicio")
+    private LocalDate fechaInicio;
+    
+    @Column(name = "fecha_fin")
+    private LocalDate fechaFin;
+    
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
     
-    @Column(name = "fecha_limite")
-    private LocalDateTime fechaLimite;
+    @Column(name = "fecha_actualizacion")
+    private LocalDateTime fechaActualizacion;
     
-    @Column(name = "progreso")
-    private Integer progreso = 0; // Porcentaje de 0 a 100
+    @Column(name = "progreso_actual")
+    private Integer progresoActual = 0;
+    
+    @Column(name = "meta")
+    private Integer meta = 100;
     
     @Column(name = "usuario_id")
-    private String usuarioId; // ID del usuario que creó el objetivo
+    private Integer usuarioId;
     
     @OneToMany(mappedBy = "objetivo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RegistroProgreso> registrosProgreso = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "objetivo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Habito> habitos = new ArrayList<>();
 
     // Enum para el estado del objetivo
     public enum EstadoObjetivo {
-        ACTIVO, COMPLETADO, PAUSADO, CANCELADO
+        PENDIENTE, EN_PROGRESO, COMPLETADO, PAUSADO, CANCELADO
     }
 
     // Constructores
     public Objetivo() {
         this.fechaCreacion = LocalDateTime.now();
-        this.estado = EstadoObjetivo.ACTIVO;
+        this.fechaActualizacion = LocalDateTime.now();
+        this.estado = EstadoObjetivo.PENDIENTE;
+        this.progresoActual = 0;
+        this.meta = 100;
     }
 
-    public Objetivo(String titulo, String descripcion, LocalDateTime fechaLimite, String usuarioId) {
+    public Objetivo(String titulo, String descripcion, Integer usuarioId) {
         this();
         this.titulo = titulo;
         this.descripcion = descripcion;
-        this.fechaLimite = fechaLimite;
         this.usuarioId = usuarioId;
     }
 
     // Getters y Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -93,6 +102,22 @@ public class Objetivo {
         this.estado = estado;
     }
 
+    public LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDate fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+    
+    public LocalDate getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDate fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
@@ -100,28 +125,36 @@ public class Objetivo {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
-
-    public LocalDateTime getFechaLimite() {
-        return fechaLimite;
+    
+    public LocalDateTime getFechaActualizacion() {
+        return fechaActualizacion;
     }
 
-    public void setFechaLimite(LocalDateTime fechaLimite) {
-        this.fechaLimite = fechaLimite;
+    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+        this.fechaActualizacion = fechaActualizacion;
     }
 
-    public Integer getProgreso() {
-        return progreso;
+    public Integer getProgresoActual() {
+        return progresoActual;
     }
 
-    public void setProgreso(Integer progreso) {
-        this.progreso = Math.max(0, Math.min(100, progreso)); // Clamp entre 0 y 100
+    public void setProgresoActual(Integer progresoActual) {
+        this.progresoActual = Math.max(0, Math.min(100, progresoActual)); // Clamp entre 0 y 100
+    }
+    
+    public Integer getMeta() {
+        return meta;
     }
 
-    public String getUsuarioId() {
+    public void setMeta(Integer meta) {
+        this.meta = meta;
+    }
+
+    public Integer getUsuarioId() {
         return usuarioId;
     }
 
-    public void setUsuarioId(String usuarioId) {
+    public void setUsuarioId(Integer usuarioId) {
         this.usuarioId = usuarioId;
     }
 
@@ -132,33 +165,14 @@ public class Objetivo {
     public void setRegistrosProgreso(List<RegistroProgreso> registrosProgreso) {
         this.registrosProgreso = registrosProgreso;
     }
-    
-    public List<Habito> getHabitos() {
-        return habitos;
-    }
-
-    public void setHabitos(List<Habito> habitos) {
-        this.habitos = habitos;
-    }
-    
-    public void agregarHabito(Habito habito) {
-        if (habito != null) {
-            habito.setObjetivo(this);
-            this.habitos.add(habito);
-        }
-    }
 
     // Métodos de utilidad
     public boolean estaCompletado() {
-        return estado == EstadoObjetivo.COMPLETADO || progreso >= 100;
-    }
-
-    public boolean estaVencido() {
-        return fechaLimite != null && LocalDateTime.now().isAfter(fechaLimite) && !estaCompletado();
+        return estado == EstadoObjetivo.COMPLETADO || progresoActual >= 100;
     }
 
     public void actualizarProgreso(int nuevoProgreso) {
-        setProgreso(nuevoProgreso);
+        setProgresoActual(nuevoProgreso);
         if (nuevoProgreso >= 100) {
             setEstado(EstadoObjetivo.COMPLETADO);
         }
@@ -170,7 +184,7 @@ public class Objetivo {
                 "id=" + id +
                 ", titulo='" + titulo + '\'' +
                 ", estado=" + estado +
-                ", progreso=" + progreso +
+                ", progresoActual=" + progresoActual +
                 '}';
     }
 }

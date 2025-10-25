@@ -26,7 +26,7 @@ public class HabitoServicio implements Serializable {
      * Registrar cumplimiento de un hábito
      * Basado en el diagrama de secuencia
      */
-    public Habito registrarCumplimiento(Long habitoId, LocalDate fecha, String observacion) {
+    public Habito registrarCumplimiento(Integer habitoId, LocalDate fecha, String observacion) {
         try {
             // 1) buscarHabito(habitoId)
             Habito habito = buscarHabito(habitoId);
@@ -61,19 +61,14 @@ public class HabitoServicio implements Serializable {
     /**
      * Obtener registros de un hábito en un rango de fechas
      */
-    public List<RegistroHabito> obtenerRegistros(Long habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
-        try {
-            return habitoDAO.findRegistrosByRango(habitoId, fechaInicio, fechaFin);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<RegistroHabito>();
-        }
+    public List<RegistroHabito> obtenerRegistros(Integer habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
+        return habitoDAO.findRegistrosByRango(habitoId, fechaInicio, fechaFin);
     }
 
     /**
      * Obtener todos los registros de hoy del usuario
      */
-    public List<RegistroHabito> obtenerRegistrosDeHoy(String usuarioId) {
+    public List<RegistroHabito> obtenerRegistrosDeHoy(Integer usuarioId) {
         try {
             return habitoDAO.findRegistrosDeHoy(usuarioId);
         } catch (Exception e) {
@@ -85,7 +80,7 @@ public class HabitoServicio implements Serializable {
     /**
      * Buscar hábito por ID
      */
-    public Habito buscarHabito(Long habitoId) {
+    public Habito buscarHabito(Integer habitoId) {
         return habitoDAO.findById(habitoId).orElse(null);
     }
 
@@ -104,7 +99,13 @@ public class HabitoServicio implements Serializable {
      */
     public RegistroHabito crearNuevoRegistro(Habito habito, LocalDate fecha, String observacion) {
         try {
-            RegistroHabito registro = new RegistroHabito(habito, fecha, 1, observacion);
+            // ✅ Actualizado a nueva estructura
+            RegistroHabito registro = new RegistroHabito();
+            registro.setHabito(habito);
+            registro.setFecha(fecha);
+            registro.setCompletado(true);  // ✅ Boolean
+            registro.setVecesRealizado(1);  // ✅ Nuevo campo
+            registro.setNotas(observacion);  // ✅ Cambiado a notas
             // guarda y retorna el registro (equivale a agregarRegistro(nuevoRegistro) en el diagrama)
             return habitoDAO.saveRegistro(registro);
         } catch (Exception e) {
@@ -116,7 +117,7 @@ public class HabitoServicio implements Serializable {
     /**
      * Obtener lista de hábitos del usuario
      */
-    public List<Habito> listarHabitosUsuario(String usuarioId) {
+    public List<Habito> listarHabitosUsuario(Integer usuarioId) {
         try {
             return habitoDAO.findByUsuarioId(usuarioId);
         } catch (Exception e) {
@@ -140,7 +141,7 @@ public class HabitoServicio implements Serializable {
     /**
      * Eliminar hábito (soft delete)
      */
-    public boolean eliminarHabito(Long habitoId) {
+    public boolean eliminarHabito(Integer habitoId) {
         try {
             habitoDAO.delete(habitoId);
             return true;
@@ -153,7 +154,7 @@ public class HabitoServicio implements Serializable {
     /**
      * Obtener estadísticas del usuario
      */
-    public Long obtenerHabitosCompletadosHoy(String usuarioId) {
+    public Long obtenerHabitosCompletadosHoy(Integer usuarioId) {
         try {
             return habitoDAO.countHabitosCompletadosHoy(usuarioId);
         } catch (Exception e) {
@@ -165,7 +166,7 @@ public class HabitoServicio implements Serializable {
     /**
      * Obtener porcentaje de completado de la semana
      */
-    public Double obtenerPorcentajeSemana(String usuarioId) {
+    public Double obtenerPorcentajeSemana(Integer usuarioId) {
         try {
             return habitoDAO.getPorcentajeCompletadoSemana(usuarioId);
         } catch (Exception e) {

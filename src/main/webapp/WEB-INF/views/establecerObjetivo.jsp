@@ -14,12 +14,69 @@
             box-sizing: border-box;
         }
         
+        /* 🎨 EFECTO DE CARGA - FADE IN */
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: #E9F7EF;
             min-height: 100vh;
             padding: 20px;
             color: #555555;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 💫 LOADING SPINNER */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(233, 247, 239, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #D5F5E3;
+            border-top: 4px solid #27AE60;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            position: absolute;
+            margin-top: 90px;
+            color: #27AE60;
+            font-weight: 600;
+            font-size: 14px;
         }
         
         .container {
@@ -169,6 +226,14 @@
     </style>
 </head>
 <body>
+    <!-- 💫 LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner"></div>
+            <div class="loading-text">Cargando...</div>
+        </div>
+    </div>
+    
     <%
         Objetivo objetivo = (Objetivo) request.getAttribute("objetivo");
         Boolean modoEdicion = (Boolean) request.getAttribute("modoEdicion");
@@ -228,19 +293,19 @@
             <div class="form-group">
                 <label for="fechaInicio">Fecha de Inicio *</label>
                 <input type="date" id="fechaInicio" name="fechaInicio" required
-                       value="<%= esEdicion && objetivo.getFechaCreacion() != null ? objetivo.getFechaCreacion().toLocalDate() : "" %>">
+                       value="<%= esEdicion && objetivo.getFechaInicio() != null ? objetivo.getFechaInicio() : "" %>">
             </div>
             
             <div class="form-group">
                 <label for="fechaFin">Fecha de Finalización *</label>
                 <input type="date" id="fechaFin" name="fechaFin" required
-                       value="<%= esEdicion && objetivo.getFechaLimite() != null ? objetivo.getFechaLimite().toLocalDate() : "" %>">
+                       value="<%= esEdicion && objetivo.getFechaFin() != null ? objetivo.getFechaFin() : "" %>">
             </div>
             
             <div class="form-group">
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado">
-                    <option value="ACTIVO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.ACTIVO ? "selected" : "" %>>Activo</option>
+                    <option value="EN_PROGRESO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.EN_PROGRESO ? "selected" : "" %>>En Progreso</option>
                     <option value="PAUSADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.PAUSADO ? "selected" : "" %>>Pausado</option>
                     <option value="COMPLETADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.COMPLETADO ? "selected" : "" %>>Completado</option>
                     <option value="CANCELADO" <%= esEdicion && objetivo.getEstado() == Objetivo.EstadoObjetivo.CANCELADO ? "selected" : "" %>>Cancelado</option>
@@ -286,6 +351,23 @@
             fechaFin.setDate(fechaFin.getDate() + 30);
             fechaFinInput.valueAsDate = fechaFin;
         }
+        
+        // 🎨 FUNCIONES DE LOADING
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        // Mostrar loading al enviar formulario
+        document.querySelector('form').addEventListener('submit', function() {
+            showLoading();
+        });
+        
+        // Mostrar loading en enlaces de navegación
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => showLoading(), 100);
+            });
+        });
     </script>
     <% } %>
 </body>

@@ -42,17 +42,15 @@ public class SupabaseConfig {
     
     /**
      * Host de la base de datos
-     * Usando AWS Pooler para mejor rendimiento y evitar timeouts
-     * Formato: aws-1-us-east-2.pooler.supabase.com
+     * Transaction Pooler de Supabase para mejor rendimiento
      */
     public static final String DB_HOST = "aws-1-us-east-2.pooler.supabase.com";
     
     /**
      * Puerto de PostgreSQL
-     * 5432 = Conexión directa (puede tener problemas de timeout)
-     * 6543 = Transaction Pooler (RECOMENDADO para aplicaciones)
+     * 6543 = Transaction Pooler (RECOMENDADO)
      */
-    public static final String DB_PORT = "6543"; // Usando Transaction Pooler
+    public static final String DB_PORT = "6543";
     
     /**
      * Nombre de la base de datos (usualmente "postgres")
@@ -64,14 +62,14 @@ public class SupabaseConfig {
      * Para puerto 6543 (Transaction Pooler): postgres.{project-ref}
      * Para puerto 5432 (Directo): postgres
      */
-    public static final String DB_USER = "postgres.pofkyvcgltumwpxvuzpp";
+    public static final String DB_USER = "postgres";
     
     /**
      * Contraseña de la base de datos
      * La estableciste al crear el proyecto
      * ⚠️ REEMPLAZA ESTO CON TU CONTRASEÑA REAL
      */
-    public static final String DB_PASSWORD = "MkkTXwEozmjmSjk1";
+    public static final String DB_PASSWORD = "G7v$kP9tL#x2Rq!M";
     
     // ============================================
     // STRINGS DE CONEXIÓN

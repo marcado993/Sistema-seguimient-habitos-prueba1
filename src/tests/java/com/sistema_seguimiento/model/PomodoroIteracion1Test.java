@@ -11,41 +11,39 @@ import static org.junit.Assert.*;
  * ITERACIÓN 1: Inicialización y Estado
  * 
  * Objetivo: Verificar que el temporizador Pomodoro se inicializa correctamente
- * en estado CONCENTRACION con 1500 segundos (25 minutos).
+ * en estado TRABAJO con 25 minutos restantes.
  * 
  * Ciclo TDD: [ROJO] -> [VERDE] -> [REFACTOR]
+ * 
+ * NOTE: Updated to use current EstadoPomodoro enum and getTiempoRestanteMinutos() method
  */
 public class PomodoroIteracion1Test {
 
-    private Pomodoro pomodoro;
-
     @Before
     public void setUp() {
-        pomodoro = new Pomodoro();
+        // Setup for tests
     }
 
     /**
-     * [ROJO] Requisito: Al inicializar un nuevo pomodoro, el estado debe ser 
-     * 'CONCENTRACION' y el tiempo restante debe ser 1500 segundos (25 minutos).
+     * Requisito: Al inicializar un nuevo pomodoro, el estado debe ser 
+     * 'TRABAJO' y el tiempo restante debe ser 25 minutos.
      * 
      * Narrativa BDD:
      * DADO un nuevo temporizador Pomodoro
      * CUANDO se inicializa
-     * ENTONCES el estado debe ser CONCENTRACION y el tiempo debe ser 1500 segundos
+     * ENTONCES el estado debe ser TRABAJO y el tiempo debe ser 25 minutos
      */
     @Test
-    public void give_nuevoPomodoro_when_inicializar_then_estadoConcentracionY1500Segundos() {
-        // Arrange (Ya hecho en setUp)
-
-        // Act
+    public void give_nuevoPomodoro_when_inicializar_then_estadoTrabajoY25Minutos() {
+        // Arrange & Act
         Pomodoro temp = new Pomodoro();
 
         // Assert
-        assertEquals("El estado inicial debe ser CONCENTRACION", 
-                     Pomodoro.EstadoTemporizador.CONCENTRACION, 
-                     temp.getEstado());
-        assertEquals("El tiempo restante inicial debe ser 1500 segundos (25 minutos)", 
-                     Integer.valueOf(1500), 
-                     temp.getTiempoRestanteSegundos());
+        assertEquals("El estado inicial debe ser TRABAJO", 
+                     Pomodoro.EstadoPomodoro.TRABAJO, 
+                     temp.getEstadoActual());
+        assertEquals("El tiempo restante inicial debe ser 25 minutos", 
+                     25, 
+                     temp.getTiempoRestanteMinutos());
     }
 }

@@ -3,6 +3,7 @@ package com.sistema_seguimiento.servlet;
 import com.sistema_seguimiento.dao.HabitoDAO;
 import com.sistema_seguimiento.model.Habito;
 import com.sistema_seguimiento.model.RegistroHabito;
+import com.sistema_seguimiento.model.Usuario;
 import com.sistema_seguimiento.services.HabitoServicio;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -31,31 +32,39 @@ public class ControladorHabitos extends HttpServlet {
     }
     
     /**
+     * Obtener el usuarioId de la sesión
+     */
+    private Integer getUsuarioIdFromSession(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        return (usuario != null) ? usuario.getId() : null;
+    }
+    
+    /**
      * Registrar cumplimiento de un hábito
      * Basado en el diagrama de secuencia
      */
-    public Habito registrarCumplimiento(Long habitoId, LocalDate fecha, String observacion) {
+    public Habito registrarCumplimiento(Integer habitoId, LocalDate fecha, String observacion) {
         return habitoServicio.registrarCumplimiento(habitoId, fecha, observacion);
     }
     
     /**
      * Obtener registros de un hábito en un rango de fechas
      */
-    public List<RegistroHabito> obtenerRegistros(Long habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<RegistroHabito> obtenerRegistros(Integer habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
         return habitoServicio.obtenerRegistros(habitoId, fechaInicio, fechaFin);
     }
     
     /**
      * Obtener todos los registros de hoy del usuario
      */
-    public List<RegistroHabito> obtenerRegistrosDeHoy(String usuarioId) {
+    public List<RegistroHabito> obtenerRegistrosDeHoy(Integer usuarioId) {
         return habitoServicio.obtenerRegistrosDeHoy(usuarioId);
     }
     
     /**
      * Buscar hábito por ID
      */
-    public Habito buscarHabito(Long habitoId) {
+    public Habito buscarHabito(Integer habitoId) {
         return habitoServicio.buscarHabito(habitoId);
     }
     
@@ -76,7 +85,7 @@ public class ControladorHabitos extends HttpServlet {
     /**
      * Obtener lista de hábitos del usuario
      */
-    public List<Habito> listarHabitosUsuario(String usuarioId) {
+    public List<Habito> listarHabitosUsuario(Integer usuarioId) {
         return habitoServicio.listarHabitosUsuario(usuarioId);
     }
     
@@ -90,21 +99,21 @@ public class ControladorHabitos extends HttpServlet {
     /**
      * Eliminar hábito (soft delete)
      */
-    public boolean eliminarHabito(Long habitoId) {
+    public boolean eliminarHabito(Integer habitoId) {
         return habitoServicio.eliminarHabito(habitoId);
     }
     
     /**
      * Obtener estadísticas del usuario
      */
-    public Long obtenerHabitosCompletadosHoy(String usuarioId) {
+    public Long obtenerHabitosCompletadosHoy(Integer usuarioId) {
         return habitoServicio.obtenerHabitosCompletadosHoy(usuarioId);
     }
     
     /**
      * Obtener porcentaje de completado de la semana
      */
-    public Double obtenerPorcentajeSemana(String usuarioId) {
+    public Double obtenerPorcentajeSemana(Integer usuarioId) {
         return habitoServicio.obtenerPorcentajeSemana(usuarioId);
     }
     
@@ -116,13 +125,11 @@ public class ControladorHabitos extends HttpServlet {
         
         // Obtener usuarioId de la sesión
         HttpSession session = request.getSession(false);
-        String usuarioId = null;
-        if (session != null && session.getAttribute("usuarioId") != null) {
-            usuarioId = session.getAttribute("usuarioId").toString();
-        }
+        Integer usuarioId = getUsuarioIdFromSession(session);
         
-        if (usuarioId == null || usuarioId.isEmpty()) {
-            usuarioId = "usuario_demo"; // Usuario por defecto para pruebas
+        if (usuarioId == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
         }
         
         try {
@@ -144,7 +151,7 @@ public class ControladorHabitos extends HttpServlet {
      * @throws ServletException si ocurre un error específico del servlet.
      * @throws IOException si ocurre un error de entrada/salida.
      */
-    private void procesarAccion(HttpServletRequest request, HttpServletResponse response, String action, String usuarioId) throws ServletException, IOException {
+    private void procesarAccion(HttpServletRequest request, HttpServletResponse response, String action, Integer usuarioId) throws ServletException, IOException {
         switch (action) {
             case "list":
                 listarHabitos(request, response, usuarioId);
@@ -171,10 +178,10 @@ public class ControladorHabitos extends HttpServlet {
     /**
      * Cargar hábito para editar
      */
-    private void editarHabito(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws ServletException, IOException {
+    private void editarHabito(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws ServletException, IOException {
         String habitoIdStr = request.getParameter("habitoId");
         if (habitoIdStr != null) {
-            Long habitoId = Long.parseLong(habitoIdStr);
+            Integer habitoId = Integer.parseInt(habitoIdStr);
             Habito habito = habitoServicio.buscarHabito(habitoId);
             
             if (habito != null && habito.getUsuarioId().equals(usuarioId)) {
@@ -200,10 +207,10 @@ public class ControladorHabitos extends HttpServlet {
      * @param usuarioId El identificador del usuario propietario del hábito.
      * @throws IOException si ocurre un error durante la redirección.
      */
-    private void eliminarHabito(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws IOException {
+    private void eliminarHabito(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws IOException {
         String habitoIdStr = request.getParameter("habitoId");
         if (habitoIdStr != null) {
-            Long habitoId = Long.parseLong(habitoIdStr);
+            Integer habitoId = Integer.parseInt(habitoIdStr);
             boolean success = habitoServicio.eliminarHabito(habitoId);
 
             if (success) {
@@ -225,12 +232,12 @@ public class ControladorHabitos extends HttpServlet {
      * @throws ServletException Por si ocurre un error durante el forward.
      * @throws IOException Por si ocurre un error de entrada/salida.
      */
-    private void verSeguimiento(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws ServletException, IOException {
+    private void verSeguimiento(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws ServletException, IOException {
         String habitoIdStr = request.getParameter("habitoId");
 
         if (habitoIdStr != null && !habitoIdStr.isEmpty()) {
             // Ver detalle de un hábito específico
-            Long habitoId = Long.parseLong(habitoIdStr);
+            Integer habitoId = Integer.parseInt(habitoIdStr);
             Habito habito = habitoServicio.buscarHabito(habitoId);
 
             if (habito != null) {
@@ -259,11 +266,11 @@ public class ControladorHabitos extends HttpServlet {
     /**
      * Procesa el formulario de registro de hábito (POST)
      */
-    private void procesarRegistroHabito(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws IOException {
+    private void procesarRegistroHabito(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws IOException {
         String habitoIdStr = request.getParameter("habitoId");
         String fechaStr = request.getParameter("fecha");
         String estadoStr = request.getParameter("estado");
-        String observacion = request.getParameter("observacion");
+        String notas = request.getParameter("notas");  // ✅ CORREGIDO: Usar "notas" en vez de "observacion"
         
         System.out.println("📝 Procesando registro de hábito:");
         System.out.println("   - Hábito ID: " + habitoIdStr);
@@ -272,10 +279,10 @@ public class ControladorHabitos extends HttpServlet {
         
         if (habitoIdStr != null && !habitoIdStr.isEmpty()) {
             try {
-                Long habitoId = Long.parseLong(habitoIdStr);
+                Integer habitoId = Integer.parseInt(habitoIdStr);
                 LocalDate fecha = fechaStr != null ? LocalDate.parse(fechaStr) : LocalDate.now();
                 
-                Habito habito = habitoServicio.registrarCumplimiento(habitoId, fecha, observacion);
+                Habito habito = habitoServicio.registrarCumplimiento(habitoId, fecha, notas);  // ✅ CORREGIDO
                 
                 if (habito != null) {
                     System.out.println("✅ Registro exitoso del hábito ID: " + habitoId);
@@ -303,7 +310,7 @@ public class ControladorHabitos extends HttpServlet {
      * @throws ServletException si ocurre un error durante el forward.
      * @throws IOException si ocurre un error de entrada/salida.
      */
-    private void listarHabitos(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws ServletException, IOException {
+    private void listarHabitos(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws ServletException, IOException {
         List<Habito> habitos = habitoServicio.listarHabitosUsuario(usuarioId);
         request.setAttribute("habitos", habitos);
         request.getRequestDispatcher("/WEB-INF/views/registroHabito.jsp").forward(request, response);
@@ -324,38 +331,62 @@ public class ControladorHabitos extends HttpServlet {
      * @param usuarioId El ID del usuario que realiza el registro.
      * @throws IOException si ocurre un error durante la redirección.
      */
-    private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws IOException {
+    private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws IOException {
         String habitoIdStr = request.getParameter("habitoId");
-        String observacion = request.getParameter("observacion");
+        String notas = request.getParameter("notas");  // ✅ CORREGIDO: Usar "notas" en vez de "observacion"
+        String vecesRealizadoStr = request.getParameter("vecesRealizado");  // ✅ NUEVO
+        String estadoAnimo = request.getParameter("estadoAnimo");  // ✅ NUEVO: Estado de ánimo
         String fechaStr = request.getParameter("fecha");
         String estado = request.getParameter("estado"); // CUMPLIDO, NO_CUMPLIDO, PARCIAL
-        String estadoAnimo = request.getParameter("estadoAnimo");
         
         LocalDate fecha = (fechaStr != null && !fechaStr.isEmpty()) 
             ? LocalDate.parse(fechaStr) 
             : LocalDate.now();
         
         if (habitoIdStr != null) {
-            Long habitoId = Long.parseLong(habitoIdStr);
+            Integer habitoId = Integer.parseInt(habitoIdStr);
             Habito habito = habitoServicio.buscarHabito(habitoId);
             
             if (habito != null) {
+                // ✅ Parsear veces_realizado
+                Integer vecesRealizado = 1; // Default
+                if (vecesRealizadoStr != null && !vecesRealizadoStr.isEmpty()) {
+                    try {
+                        vecesRealizado = Integer.parseInt(vecesRealizadoStr);
+                    } catch (NumberFormatException e) {
+                        vecesRealizado = 1;
+                    }
+                }
+                
                 // Crear el registro con el estado correspondiente
                 RegistroHabito registro = new RegistroHabito();
                 registro.setHabito(habito);
                 registro.setFecha(fecha);
-                registro.setObservacion(observacion);
-                registro.setEstadoAnimo(estadoAnimo);
+                registro.setNotas(notas);  // ✅ Cambio: setNotas en lugar de setObservacion
+                registro.setVecesRealizado(vecesRealizado);  // ✅ NUEVO: Usar el valor ingresado por el usuario
                 
-
-                // Determinar el valor de "completado" basado en el estado
-                if ("CUMPLIDO".equals(estado)) {
-                    registro.setCompletado(obtenerMetaDiariaOPredeterminada(habito)); // Cumplió la meta
-                } else if ("PARCIAL".equals(estado)) {
-                    registro.setCompletado(obtenerMetaDiariaOPredeterminada(habito) / 2); // Cumplió parcialmente
-                } else { // NO_CUMPLIDO
-                    registro.setCompletado(0); // No cumplió
+                // ✅ NUEVO: Establecer estado de ánimo
+                if (estadoAnimo != null && !estadoAnimo.isEmpty()) {
+                    registro.setEstadoAnimo(estadoAnimo);
+                } else {
+                    registro.setEstadoAnimo("neutral");  // Default
                 }
+                
+                // ✅ Determinar completado (Boolean) basado en si cumplió la meta
+                Integer metaDiaria = obtenerMetaDiariaOPredeterminada(habito);
+                if ("CUMPLIDO".equals(estado) || vecesRealizado >= metaDiaria) {
+                    registro.setCompletado(true);  // ✅ Boolean true
+                } else {
+                    registro.setCompletado(false);  // ✅ Boolean false
+                }
+                
+                System.out.println("📝 Registro creado:");
+                System.out.println("   - Hábito: " + habito.getNombre());
+                System.out.println("   - Fecha: " + fecha);
+                System.out.println("   - Veces realizado: " + vecesRealizado);
+                System.out.println("   - Meta diaria: " + metaDiaria);
+                System.out.println("   - Completado: " + registro.getCompletado());
+                System.out.println("   - Estado de ánimo: " + estadoAnimo);  // ✅ NUEVO log
                 
                 // Guardar el registro
                 RegistroHabito registroGuardado = habitoServicio.getHabitoDAO().saveRegistro(registro);
@@ -379,13 +410,11 @@ public class ControladorHabitos extends HttpServlet {
         
         // Obtener usuarioId de la sesión
         HttpSession session = request.getSession(false);
-        String usuarioId = null;
-        if (session != null && session.getAttribute("usuarioId") != null) {
-            usuarioId = session.getAttribute("usuarioId").toString();
-        }
+        Integer usuarioId = getUsuarioIdFromSession(session);
         
-        if (usuarioId == null || usuarioId.isEmpty()) {
-            usuarioId = "usuario_demo"; // Usuario por defecto para pruebas
+        if (usuarioId == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
         }
         
         try {
@@ -402,47 +431,65 @@ public class ControladorHabitos extends HttpServlet {
                 String objetivoIdStr = request.getParameter("objetivoId");
                 String fechaInicioStr = request.getParameter("fechaInicio");
                 
-                Habito habito = new Habito();
-                habito.setNombre(nombre);
-                habito.setDescripcion(descripcion);
-                habito.setUsuarioId(usuarioId);
+                System.out.println("🎯 Creando hábito con objetivo:");
+                System.out.println("   - Nombre: " + nombre);
+                System.out.println("   - Descripción: " + descripcion);
+                System.out.println("   - Frecuencia: " + frecuenciaStr);
+                System.out.println("   - Meta Diaria: " + metaDiariaStr);
+                System.out.println("   - Fecha Inicio: " + fechaInicioStr);
+                System.out.println("   - Usuario ID: " + usuarioId);
                 
-                if (frecuenciaStr != null && !frecuenciaStr.isEmpty()) {
-                    habito.setFrecuencia(Habito.FrecuenciaHabito.valueOf(frecuenciaStr));
-                }
-                
-                if (metaDiariaStr != null && !metaDiariaStr.isEmpty()) {
-                    habito.setMetaDiaria(Integer.parseInt(metaDiariaStr));
-                }
-                
-                if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
-                    habito.setFechaInicio(LocalDate.parse(fechaInicioStr));
-                }
-                
-                // Asociar con objetivo si se proporciona
-                if (objetivoIdStr != null && !objetivoIdStr.isEmpty()) {
-                    Long objetivoId = Long.parseLong(objetivoIdStr);
-                    com.sistema_seguimiento.dao.ObjetivoDAO objetivoDAO = new com.sistema_seguimiento.dao.ObjetivoDAO();
-                    com.sistema_seguimiento.model.Objetivo objetivo = objetivoDAO.findById(objetivoId).orElse(null);
-                    if (objetivo != null) {
-                        habito.setObjetivo(objetivo);
+                try {
+                    Habito habito = new Habito();
+                    habito.setNombre(nombre);
+                    habito.setDescripcion(descripcion);
+                    habito.setUsuarioId(usuarioId);
+                    habito.setActivo(true);
+                    
+                    // ✅ Estado de ánimo con valor por defecto (no se pide en el formulario)
+                    habito.setEstadoAnimo("neutral");
+                    
+                    if (frecuenciaStr != null && !frecuenciaStr.isEmpty()) {
+                        habito.setFrecuencia(Habito.FrecuenciaHabito.valueOf(frecuenciaStr.toUpperCase()));
+                    } else {
+                        habito.setFrecuencia(Habito.FrecuenciaHabito.DIARIA); // Default
                     }
-                }
-                
-                Habito habitoGuardado = habitoServicio.guardarHabito(habito);
-                
-                if (habitoGuardado != null) {
-                    request.getSession().setAttribute("mensaje", "✅ Hábito '" + nombre + "' creado y asociado al objetivo exitosamente");
-                    response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&success=true");
-                } else {
-                    response.sendRedirect("controlador-objetivos?action=nuevo&error=save");
+                    
+                    if (metaDiariaStr != null && !metaDiariaStr.isEmpty()) {
+                        habito.setMetaDiaria(Integer.parseInt(metaDiariaStr));
+                    } else {
+                        habito.setMetaDiaria(1); // Default
+                    }
+                    
+                    if (fechaInicioStr != null && !fechaInicioStr.isEmpty()) {
+                        habito.setFechaInicio(LocalDate.parse(fechaInicioStr));
+                    } else {
+                        habito.setFechaInicio(LocalDate.now()); // Default
+                    }
+                    
+                    Habito habitoGuardado = habitoServicio.guardarHabito(habito);
+                    
+                    if (habitoGuardado != null && habitoGuardado.getId() != null) {
+                        System.out.println("✅ Hábito guardado exitosamente con ID: " + habitoGuardado.getId());
+                        request.getSession().setAttribute("mensaje", "✅ Hábito '" + nombre + "' creado exitosamente");
+                        response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=listar");
+                    } else {
+                        System.err.println("❌ Error: habitoGuardado es null o no tiene ID");
+                        request.getSession().setAttribute("error", "❌ Error al guardar el hábito. Intenta nuevamente.");
+                        response.sendRedirect(request.getContextPath() + "/planificar");
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ Excepción al crear hábito: " + e.getMessage());
+                    e.printStackTrace();
+                    request.getSession().setAttribute("error", "❌ Error: " + e.getMessage());
+                    response.sendRedirect(request.getContextPath() + "/planificar");
                 }
                 
             } else if ("actualizar".equals(action)) {
                 // Actualizar hábito existente
                 String habitoIdStr = request.getParameter("habitoId");
                 if (habitoIdStr != null) {
-                    Long habitoId = Long.parseLong(habitoIdStr);
+                    Integer habitoId = Integer.parseInt(habitoIdStr);
                     Habito habito = habitoServicio.buscarHabito(habitoId);
                     
                     if (habito != null && habito.getUsuarioId().equals(usuarioId)) {
@@ -490,7 +537,7 @@ public class ControladorHabitos extends HttpServlet {
                 Habito habito;
                 if (habitoIdStr != null && !habitoIdStr.isEmpty()) {
                     // Actualizar hábito existente
-                    Long habitoId = Long.parseLong(habitoIdStr);
+                    Integer habitoId = Integer.parseInt(habitoIdStr);
                     habito = habitoServicio.buscarHabito(habitoId);
                     if (habito == null) {
                         response.sendRedirect("controlador-habitos?action=list&error=notfound");
@@ -539,7 +586,7 @@ public class ControladorHabitos extends HttpServlet {
     /**
      * Mostrar formulario para registrar hábito diario
      */
-    private void mostrarFormularioRegistro(HttpServletRequest request, HttpServletResponse response, String usuarioId) throws ServletException, IOException {
+    private void mostrarFormularioRegistro(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws ServletException, IOException {
         System.out.println("📝 Mostrando formulario de registro de hábitos para usuario: " + usuarioId);
         
         // Obtener todos los hábitos del usuario para que pueda seleccionar cuál registrar

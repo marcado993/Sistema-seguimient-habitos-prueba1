@@ -11,9 +11,11 @@ import static org.junit.Assert.*;
  * ITERACIÓN 2: Transición a Descanso Corto
  * 
  * Objetivo: Verificar que el Pomodoro transiciona correctamente del estado
- * CONCENTRACION al estado DESCANSO_CORTO con 300 segundos (5 minutos).
+ * TRABAJO al estado DESCANSO_CORTO con 5 minutos restantes.
  * 
  * Ciclo TDD: [ROJO] -> [VERDE] -> [REFACTOR]
+ * 
+ * NOTE: Updated to use current EstadoPomodoro enum and pasarTiempo() method
  */
 public class PomodoroIteracion2Test {
 
@@ -25,67 +27,67 @@ public class PomodoroIteracion2Test {
     }
 
     /**
-     * [ROJO] Requisito: Si el Pomodoro está en estado 'CONCENTRACION' y se invoca 
-     * el método finalizarSesion(), el estado debe cambiar a 'DESCANSO_CORTO' y el 
-     * tiempo restante debe ser 300 segundos (5 minutos).
+     * Requisito: Si el Pomodoro está en estado 'TRABAJO' y se invoca 
+     * el método pasarTiempo() para completar 25 minutos, el estado debe cambiar 
+     * a 'DESCANSO_CORTO' y el tiempo restante debe ser 5 minutos.
      * 
      * Narrativa BDD:
-     * DADO un Pomodoro en estado CONCENTRACION
-     * CUANDO se invoca el método finalizarSesion()
-     * ENTONCES el estado debe cambiar a DESCANSO_CORTO y el tiempo debe ser 300 segundos
+     * DADO un Pomodoro en estado TRABAJO
+     * CUANDO se invoca el método pasarTiempo() para completar los 25 minutos
+     * ENTONCES el estado debe cambiar a DESCANSO_CORTO y el tiempo debe ser 5 minutos
      */
     @Test
-    public void give_pomodoroEnConcentracion_when_finalizarSesion_then_transicionaADescansoCortoY300Segundos() {
+    public void give_pomodoroEnTrabajo_when_pasarTiempo25Minutos_then_transicionaADescansoCorto() {
         // Arrange
-       assertEquals("El Pomodoro debe estar en estado CONCENTRACION inicial",
-               Pomodoro.EstadoTemporizador.CONCENTRACION,
-                     pomodoro.getEstado());
-        assertEquals("El tiempo restante debe ser 1500 segundos",
-                     Integer.valueOf(1500),
-                     pomodoro.getTiempoRestanteSegundos());
+        assertEquals("El Pomodoro debe estar en estado TRABAJO inicial",
+                Pomodoro.EstadoPomodoro.TRABAJO,
+                pomodoro.getEstadoActual());
+        assertEquals("El tiempo restante debe ser 25 minutos",
+                25,
+                pomodoro.getTiempoRestanteMinutos());
 
-        // Act
-        pomodoro.finalizarSesion();
+        // Act - Simular que pasaron 25 minutos (completar sesión de trabajo)
+        pomodoro.pasarTiempo(25);
 
         // Assert
-        assertEquals("Después de finalizar, el estado debe ser DESCANSO_CORTO",
-                     Pomodoro.EstadoTemporizador.DESCANSO_CORTO,
-                     pomodoro.getEstado());
-        assertEquals("Después de finalizar, el tiempo restante debe ser 300 segundos (5 minutos)",
-                     Integer.valueOf(300),
-                     pomodoro.getTiempoRestanteSegundos());
+        assertEquals("Después de completar trabajo, el estado debe ser DESCANSO_CORTO",
+                Pomodoro.EstadoPomodoro.DESCANSO_CORTO,
+                pomodoro.getEstadoActual());
+        assertEquals("Después de completar, el tiempo restante debe ser 5 minutos (descanso corto)",
+                5,
+                pomodoro.getTiempoRestanteMinutos());
     }
 
     /**
-     * [BONUS] Test adicional: Transición de Descanso Corto a Concentración.
+     * Test adicional: Transición de Descanso Corto a Trabajo.
      * 
      * Narrativa BDD:
-     * DADO un Pomodoro que ha completado una sesión de CONCENTRACION
-     * CUANDO se encuentra en estado DESCANSO_CORTO y se invoca finalizarSesion()
-     * ENTONCES debe retornar a CONCENTRACION con 1500 segundos
+     * DADO un Pomodoro que ha completado una sesión de TRABAJO
+     * CUANDO se encuentra en estado DESCANSO_CORTO y se invoca pasarTiempo(5)
+     * ENTONCES debe retornar a TRABAJO con 25 minutos
      */
     @Test
-    public void give_pomodoroEnDescansoCorto_when_finalizarSesion_then_transicionaAConcentracionY1500Segundos() {
+    public void give_pomodoroEnDescansoCorto_when_pasarTiempo5Minutos_then_transicionaATrabajoY25Minutos() {
         // Arrange: llevar al Pomodoro a estado DESCANSO_CORTO
-        pomodoro.finalizarSesion();
+        pomodoro.pasarTiempo(25);
         assertEquals("El Pomodoro debe estar en DESCANSO_CORTO",
-                     Pomodoro.EstadoTemporizador.DESCANSO_CORTO,
-                     pomodoro.getEstado());
+                Pomodoro.EstadoPomodoro.DESCANSO_CORTO,
+                pomodoro.getEstadoActual());
 
-        // Act
-        pomodoro.finalizarSesion();
+        // Act - Completar el descanso corto (5 minutos)
+        pomodoro.pasarTiempo(5);
 
         // Assert
-        assertEquals("Después de finalizar descanso corto, debe volver a CONCENTRACION",
-                     Pomodoro.EstadoTemporizador.CONCENTRACION,
-                     pomodoro.getEstado());
-        assertEquals("El tiempo restante debe ser 1500 segundos nuevamente",
-                     Integer.valueOf(1500),
-                     pomodoro.getTiempoRestanteSegundos());
+        assertEquals("Después de completar descanso corto, debe volver a TRABAJO",
+                Pomodoro.EstadoPomodoro.TRABAJO,
+                pomodoro.getEstadoActual());
+        assertEquals("El tiempo restante debe ser 25 minutos nuevamente",
+                25,
+                pomodoro.getTiempoRestanteMinutos());
     }
 
     /**
-     * [BONUS] Test adicional: Múltiples ciclos completos.
+     * Test adicional: Múltiples ciclos completos.
      * 
      * Narrativa BDD:
      * DADO un Pomodoro configurado
@@ -94,23 +96,23 @@ public class PomodoroIteracion2Test {
      */
     @Test
     public void give_pomodoro_when_multipleCiclos_then_ciclosCorrectos() {
-        // Ciclo 1: Concentración
-        assertEquals(Pomodoro.EstadoTemporizador.CONCENTRACION, pomodoro.getEstado());
-        assertEquals(Integer.valueOf(1500), pomodoro.getTiempoRestanteSegundos());
+        // Ciclo 1: Trabajo
+        assertEquals(Pomodoro.EstadoPomodoro.TRABAJO, pomodoro.getEstadoActual());
+        assertEquals(25, pomodoro.getTiempoRestanteMinutos());
 
-        // Ciclo 1: Descanso Corto
-        pomodoro.finalizarSesion();
-        assertEquals(Pomodoro.EstadoTemporizador.DESCANSO_CORTO, pomodoro.getEstado());
-        assertEquals(Integer.valueOf(300), pomodoro.getTiempoRestanteSegundos());
+        // Ciclo 1: Transición a Descanso Corto
+        pomodoro.pasarTiempo(25);
+        assertEquals(Pomodoro.EstadoPomodoro.DESCANSO_CORTO, pomodoro.getEstadoActual());
+        assertEquals(5, pomodoro.getTiempoRestanteMinutos());
 
-        // Ciclo 2: Concentración nuevamente
-        pomodoro.finalizarSesion();
-        assertEquals(Pomodoro.EstadoTemporizador.CONCENTRACION, pomodoro.getEstado());
-        assertEquals(Integer.valueOf(1500), pomodoro.getTiempoRestanteSegundos());
+        // Ciclo 2: Transición de vuelta a Trabajo
+        pomodoro.pasarTiempo(5);
+        assertEquals(Pomodoro.EstadoPomodoro.TRABAJO, pomodoro.getEstadoActual());
+        assertEquals(25, pomodoro.getTiempoRestanteMinutos());
 
-        // Ciclo 2: Descanso Corto nuevamente
-        pomodoro.finalizarSesion();
-        assertEquals(Pomodoro.EstadoTemporizador.DESCANSO_CORTO, pomodoro.getEstado());
-        assertEquals(Integer.valueOf(300), pomodoro.getTiempoRestanteSegundos());
+        // Ciclo 2: Transición a Descanso Corto nuevamente
+        pomodoro.pasarTiempo(25);
+        assertEquals(Pomodoro.EstadoPomodoro.DESCANSO_CORTO, pomodoro.getEstadoActual());
+        assertEquals(5, pomodoro.getTiempoRestanteMinutos());
     }
 }

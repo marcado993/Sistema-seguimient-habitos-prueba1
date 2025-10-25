@@ -72,7 +72,7 @@ public class RegistroProgresoDAO {
     /**
      * Obtiene todos los registros de progreso de un hábito
      */
-    public List<RegistroProgreso> obtenerPorHabito(Long habitoId) {
+    public List<RegistroProgreso> obtenerPorHabito(Integer habitoId) {
         return executeQuery(em -> {
             TypedQuery<RegistroProgreso> query = em.createQuery(
                 "SELECT r FROM RegistroProgreso r WHERE r.habito.id = :habitoId ORDER BY r.fecha DESC",
@@ -86,7 +86,7 @@ public class RegistroProgresoDAO {
     /**
      * Obtiene un registro de progreso por ID
      */
-    public RegistroProgreso obtenerPorId(Long id) {
+    public RegistroProgreso obtenerPorId(Integer id) {
         return executeQuery(em -> em.find(RegistroProgreso.class, id));
     }
     
@@ -121,7 +121,7 @@ public class RegistroProgresoDAO {
     /**
      * Cuenta los registros cumplidos de un hábito
      */
-    public long contarCumplidos(Long habitoId) {
+    public long contarCumplidos(Integer habitoId) {
         return executeQuery(em -> {
             TypedQuery<Long> query = em.createQuery(
                 "SELECT COUNT(r) FROM RegistroProgreso r WHERE r.habito.id = :habitoId AND r.cumplido = true",

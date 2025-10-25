@@ -1,11 +1,14 @@
 package com.sistema_seguimiento.servlet;
 
-import jakarta.servlet.http.HttpServlet;
-
 /**
- * @deprecated Unificado en {@link ControladorObjetivo}. Esta clase queda sin uso y no está mapeada.
+ * @deprecated Este archivo está vacío. La funcionalidad ha sido completamente migrada a ControladorObjetivo.
+ * Este archivo será eliminado en futuras versiones.
+ * 
+ * NO USAR - Clase Deprecated
  */
-@Deprecated
-public class ControladorPlanificarObjetivo extends HttpServlet {
-    // Clase vacía intencionalmente. Toda la funcionalidad fue fusionada en ControladorObjetivo.
+@Deprecated(since = "2.0", forRemoval = true)
+public class ControladorPlanificarObjetivo {
+    private ControladorPlanificarObjetivo() {
+        // Clase vacía - No instanciar
+    }
 }

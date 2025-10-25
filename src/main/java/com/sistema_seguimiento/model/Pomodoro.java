@@ -50,15 +50,31 @@ public class Pomodoro {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private EstadoPomodoro estadoActual;
+    private Integer id;
+    
     @Enumerated(EnumType.STRING)
-    private EstadoTemporizador estado;
-    private int tiempoRestanteMinutos;
+    @Column(name = "estado")
+    private EstadoPomodoro estadoActual;
+    
+    @Column(name = "estadoactual")
+    private Short estadoActualDb; // Para compatibilidad con DB si es necesario
+    
+    @Column(name = "tiemporestanteminutos")
+    private Integer tiempoRestanteMinutos;
+    
+    @Column(name = "tiemporestantesegundos")
     private Integer tiempoRestanteSegundos;
-    private int pomodorosCompletados;
+    
+    @Column(name = "pomodoroscompletados")
+    private Integer pomodorosCompletados;
+    
+    @Column(name = "iniciosesion")
     private LocalDateTime inicioSesion;
+    
+    @Column(name = "ultimaactualizacion")
     private LocalDateTime ultimaActualizacion;
+    
+    @Column(name = "usuarioid")
     private String usuarioId;
     
     // Constructores
@@ -176,11 +192,11 @@ public class Pomodoro {
     }
     
     // Getters y Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     
@@ -266,45 +282,6 @@ public class Pomodoro {
             default:
                 return 0;
         }
-    }
-    
-    /**
-     * Finaliza la sesión actual y transiciona al siguiente estado.
-     * - CONCENTRACION -> DESCANSO_CORTO (5 minutos)
-     * - DESCANSO_CORTO -> CONCENTRACION (25 minutos)
-     * - DESCANSO_LARGO -> CONCENTRACION (25 minutos)
-     */
-    public void finalizarSesion() {
-        transicionarAlSiguienteEstado();
-    }
-    
-    private void transicionarAlSiguienteEstado() {
-        if (this.estado == null) {
-            this.estado = EstadoTemporizador.CONCENTRACION;
-            this.tiempoRestanteSegundos = DURACION_CONCENTRACION;
-            return;
-        }
-        
-        switch (this.estado) {
-            case CONCENTRACION:
-                this.estado = EstadoTemporizador.DESCANSO_CORTO;
-                this.tiempoRestanteSegundos = DURACION_DESCANSO_CORTO_SEG;
-                break;
-            case DESCANSO_CORTO:
-            case DESCANSO_LARGO:
-                this.estado = EstadoTemporizador.CONCENTRACION;
-                this.tiempoRestanteSegundos = DURACION_CONCENTRACION;
-                break;
-        }
-    }
-    
-    // Getter para estado (EstadoTemporizador)
-    public EstadoTemporizador getEstado() {
-        return estado;
-    }
-    
-    public void setEstado(EstadoTemporizador estado) {
-        this.estado = estado;
     }
     
     public Integer getTiempoRestanteSegundos() {

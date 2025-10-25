@@ -15,12 +15,69 @@
             box-sizing: border-box;
         }
         
+        /* 🎨 EFECTO DE CARGA - FADE IN */
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: #E9F7EF;
             min-height: 100vh;
             padding: 20px;
             color: #555555;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 💫 LOADING SPINNER */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(233, 247, 239, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #D5F5E3;
+            border-top: 4px solid #27AE60;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            position: absolute;
+            margin-top: 90px;
+            color: #27AE60;
+            font-weight: 600;
+            font-size: 14px;
         }
         
         .container {
@@ -324,6 +381,14 @@
     </style>
 </head>
 <body>
+    <!-- 💫 LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner"></div>
+            <div class="loading-text">Cargando...</div>
+        </div>
+    </div>
+    
     <div class="container">
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -376,7 +441,8 @@
                         
                         if (registros != null && habito.getMetaDiaria() != null) {
                             for (RegistroHabito r : registros) {
-                                if (r.getCompletado() != null && r.getCompletado() >= habito.getMetaDiaria()) {
+                                // ✅ CORREGIDO: Usar vecesRealizado en vez de completado (que ahora es Boolean)
+                                if (r.getVecesRealizado() != null && r.getVecesRealizado() >= habito.getMetaDiaria()) {
                                     cumplidos++;
                                 }
                             }
@@ -417,12 +483,13 @@
                     <div class="registros-list">
                         <% for (RegistroHabito registro : registros) { 
                             String claseEstado = "";
-                            Integer completado = registro.getCompletado();
+                            // ✅ CORREGIDO: Usar vecesRealizado en vez de completado (que ahora es Boolean)
+                            Integer vecesRealizado = registro.getVecesRealizado();
                             Integer metaDiaria = habito.getMetaDiaria();
                             
-                            if (completado != null && metaDiaria != null && completado >= metaDiaria) {
+                            if (vecesRealizado != null && metaDiaria != null && vecesRealizado >= metaDiaria) {
                                 claseEstado = "registro-cumplido";
-                            } else if (completado != null && completado > 0) {
+                            } else if (vecesRealizado != null && vecesRealizado > 0) {
                                 claseEstado = "registro-parcial";
                             } else {
                                 claseEstado = "registro-no-cumplido";
@@ -430,7 +497,7 @@
                         %>
                         <div class="registro-item <%= claseEstado %>">
                             <%= registro.getFecha() %><br>
-                            <%= completado != null ? completado : 0 %>/<%= metaDiaria != null ? metaDiaria : 0 %>
+                            <%= vecesRealizado != null ? vecesRealizado : 0 %>/<%= metaDiaria != null ? metaDiaria : 0 %>
                         </div>
                         <% } %>
                     </div>
@@ -534,6 +601,18 @@
             document.getElementById('habitosCumplidos').textContent = habitosCumplidosHoy;
             document.getElementById('rachaMaxima').textContent = rachaMaxima;
             document.getElementById('porcentaje').textContent = promedioExito + '%';
+        });
+        
+        // 🎨 FUNCIONES DE LOADING
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        // Mostrar loading en enlaces de navegación
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => showLoading(), 100);
+            });
         });
     </script>
 </body>

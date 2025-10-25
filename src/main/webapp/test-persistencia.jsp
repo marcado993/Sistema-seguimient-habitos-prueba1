@@ -119,9 +119,9 @@
                     Objetivo objetivo = new Objetivo();
                     objetivo.setTitulo("Test - Perder peso");
                     objetivo.setDescripcion("Objetivo de prueba para verificar persistencia");
-                    objetivo.setUsuarioId("usuario_demo");
-                    objetivo.setEstado(Objetivo.EstadoObjetivo.ACTIVO);
-                    objetivo.setFechaLimite(LocalDateTime.now().plusDays(90));
+                    objetivo.setUsuarioId(1);
+                    objetivo.setEstado(Objetivo.EstadoObjetivo.EN_PROGRESO);
+                    objetivo.setFechaFin(LocalDate.now().plusDays(90));
                     
                     objetivo = objetivoDAO.save(objetivo);
                     

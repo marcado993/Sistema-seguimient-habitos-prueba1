@@ -12,12 +12,12 @@ import java.util.Optional;
 /**
  * DAO para gestión de Hábitos
  * 
- * Refactorizado para usar BaseDAO y eliminar código repetitivo
- * de gestión de transacciones.
+ * Proporciona operaciones CRUD y consultas específicas para la gestión
+ * de hábitos, registros de hábitos y estadísticas.
  */
-public class HabitoDAO extends BaseDAO {
+public class HabitoDAO {
 
-    public List<Habito> findByUsuarioId(String usuarioId) {
+    public List<Habito> findByUsuarioId(Integer usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Habito> query = em.createQuery(
@@ -33,7 +33,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public Optional<Habito> findById(Long id) {
+    public Optional<Habito> findById(Integer id) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             Habito habito = em.find(Habito.class, id);
@@ -43,7 +43,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public List<Habito> findHabitosActivos(String usuarioId) {
+    public List<Habito> findHabitosActivos(Integer usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Habito> query = em.createQuery(
@@ -67,13 +67,6 @@ public class HabitoDAO extends BaseDAO {
             
             // Log para debugging
             System.out.println("💾 Guardando hábito: " + habito.getNombre());
-            if (habito.getObjetivo() != null) {
-                System.out.println("🎯 Asociado al objetivo ID: " + habito.getObjetivo().getId());
-                // Asegurar que el objetivo esté en el contexto de persistencia
-                if (!em.contains(habito.getObjetivo())) {
-                    habito.setObjetivo(em.merge(habito.getObjetivo()));
-                }
-            }
             
             if (habito.getId() == null) {
                 em.persist(habito);
@@ -99,7 +92,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public void delete(Long id) {
+    public void delete(Integer id) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -120,7 +113,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public RegistroHabito findRegistroByFecha(Long habitoId, LocalDate fecha) {
+    public RegistroHabito findRegistroByFecha(Integer habitoId, LocalDate fecha) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<RegistroHabito> query = em.createQuery(
@@ -157,7 +150,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public void registrarCompletado(Long habitoId, LocalDate fecha, String observacion) {
+    public void registrarCompletado(Integer habitoId, LocalDate fecha, String observacion) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -179,15 +172,21 @@ public class HabitoDAO extends BaseDAO {
             RegistroHabito registro;
             
             if (existentes.isEmpty()) {
-                // Crear nuevo registro
-                registro = new RegistroHabito(habito, fecha, 1, observacion);
+                // Crear nuevo registro - ✅ Actualizado a nueva estructura
+                registro = new RegistroHabito();
+                registro.setHabito(habito);
+                registro.setFecha(fecha);
+                registro.setCompletado(true);  // ✅ Boolean true
+                registro.setVecesRealizado(1);  // ✅ Nuevo campo
+                registro.setNotas(observacion);  // ✅ Cambiado a setNotas
                 em.persist(registro);
             } else {
-                // Incrementar existente
+                // Incrementar existente - ✅ Actualizado
                 registro = existentes.get(0);
-                registro.setCompletado(registro.getCompletado() + 1);
+                registro.setVecesRealizado(registro.getVecesRealizado() + 1);  // ✅ Incrementar veces_realizado
+                registro.setCompletado(true);  // ✅ Marcar como completado
                 if (observacion != null && !observacion.trim().isEmpty()) {
-                    registro.setObservacion(observacion);
+                    registro.setNotas(observacion);  // ✅ Cambiado a setNotas
                 }
                 em.merge(registro);
             }
@@ -203,7 +202,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public List<RegistroHabito> findRegistrosByRango(Long habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<RegistroHabito> findRegistrosByRango(Integer habitoId, LocalDate fechaInicio, LocalDate fechaFin) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<RegistroHabito> query = em.createQuery(
@@ -218,7 +217,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public List<RegistroHabito> findRegistrosDeHoy(String usuarioId) {
+    public List<RegistroHabito> findRegistrosDeHoy(Integer usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<RegistroHabito> query = em.createQuery(
@@ -232,7 +231,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public Long countHabitosCompletadosHoy(String usuarioId) {
+    public Long countHabitosCompletadosHoy(Integer usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             TypedQuery<Long> query = em.createQuery(
@@ -246,7 +245,7 @@ public class HabitoDAO extends BaseDAO {
         }
     }
 
-    public Double getPorcentajeCompletadoSemana(String usuarioId) {
+    public Double getPorcentajeCompletadoSemana(Integer usuarioId) {
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             LocalDate hoy = LocalDate.now();

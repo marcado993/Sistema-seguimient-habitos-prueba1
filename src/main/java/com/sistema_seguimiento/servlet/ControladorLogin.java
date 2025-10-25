@@ -26,7 +26,7 @@ public class ControladorLogin extends HttpServlet {
         usuarioDAO = new UsuarioDAOJPA();
         
         // Crear usuario demo si no existe
-        if (!usuarioDAO.existsByCorreo("demo@ejemplo.com")) {
+        if (!usuarioDAO.findByCorreo("demo@ejemplo.com").isPresent()) {
             Usuario demo = new Usuario("Usuario Demo", "demo@ejemplo.com", "demo123");
             usuarioDAO.save(demo);
             System.out.println("✓ Usuario demo creado");

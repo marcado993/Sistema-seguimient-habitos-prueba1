@@ -15,12 +15,69 @@
             box-sizing: border-box;
         }
         
+        /* 🎨 EFECTO DE CARGA - FADE IN */
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: #E9F7EF;
             min-height: 100vh;
             padding: 20px;
             color: #555555;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 💫 LOADING SPINNER */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(233, 247, 239, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #D5F5E3;
+            border-top: 4px solid #27AE60;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            position: absolute;
+            margin-top: 90px;
+            color: #27AE60;
+            font-weight: 600;
+            font-size: 14px;
         }
         
         .container {
@@ -242,6 +299,23 @@
             background: white;
         }
         
+        /* ✅ NUEVO: Container vertical para cards + formulario */
+        .habitos-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .habito-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
         .habitos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -299,6 +373,68 @@
         .habito-icon {
             font-size: 32px;
             margin-bottom: 10px;
+        }
+        
+        /* ✅ NUEVO: Formulario dinámico debajo de card */
+        .formulario-registro-dinamico {
+            background: #f9f9f9;
+            border: 2px solid #A8E6CF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ✅ NUEVO: Estilos para selector de estado de ánimo */
+        .animo-grid {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .animo-emoji {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .animo-emoji input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .animo-emoji span {
+            display: inline-block;
+            font-size: 36px;
+            padding: 10px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            background: #f5f5f5;
+            transition: all 0.3s ease;
+        }
+        
+        .animo-emoji:hover span {
+            transform: scale(1.15);
+            background: #e8f5e9;
+        }
+        
+        .animo-emoji input[type="radio"]:checked + span {
+            border-color: #A8E6CF;
+            background: #A8E6CF;
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(168, 230, 207, 0.5);
         }
         
         .no-habitos {
@@ -493,6 +629,14 @@
     </style>
 </head>
 <body>
+    <!-- 💫 LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner"></div>
+            <div class="loading-text">Cargando...</div>
+        </div>
+    </div>
+    
     <div class="container">
         <!-- Header con botón dashboard -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -516,22 +660,29 @@
                            placeholder="🔍 Buscar hábito..." 
                            autocomplete="off">
                     
-                    <div class="habitos-grid" id="habitosGrid">
+                    <!-- ✅ NUEVO: Container para cards + formulario intercalado -->
+                    <div class="habitos-container" id="habitosContainer">
                         <%
                             List<Habito> habitos = (List<Habito>) request.getAttribute("habitos");
                             if (habitos != null && !habitos.isEmpty()) {
                                 for (Habito h : habitos) {
                         %>
-                            <div class="habito-card-select" data-habito-nombre="<%= h.getNombre().toLowerCase() %>" onclick="selectHabito(this, '<%= h.getId() %>')">
-                                <input type="radio" name="habitoRadio" value="<%= h.getId() %>" id="habito_<%= h.getId() %>">
-                                <div class="habito-icon">🎯</div>
-                                <div class="habito-card-title"><%= h.getNombre() %></div>
-                                <div class="habito-card-info">
-                                    <span>📊 Meta: <%= h.getMetaDiaria() != null ? h.getMetaDiaria() : 0 %></span>
-                                    <% if (h.getFrecuencia() != null) { %>
-                                        <span>| <%= h.getFrecuencia() %></span>
-                                    <% } %>
+                            <div class="habito-wrapper" data-habito-id="<%= h.getId() %>">
+                                <div class="habito-card-select" 
+                                     data-habito-nombre="<%= h.getNombre().toLowerCase() %>" 
+                                     onclick="selectHabito(this, '<%= h.getId() %>')"
+                                     data-meta="<%= h.getMetaDiaria() != null ? h.getMetaDiaria() : 1 %>">
+                                    <input type="radio" name="habitoRadio" value="<%= h.getId() %>" id="habito_<%= h.getId() %>">
+                                    <div class="habito-icon">🎯</div>
+                                    <div class="habito-card-title"><%= h.getNombre() %></div>
+                                    <div class="habito-card-info">
+                                        <span>📊 Meta: <%= h.getMetaDiaria() != null ? h.getMetaDiaria() : 0 %></span>
+                                        <% if (h.getFrecuencia() != null) { %>
+                                            <span>| <%= h.getFrecuencia() %></span>
+                                        <% } %>
+                                    </div>
                                 </div>
+                                <!-- El formulario se insertará aquí dinámicamente -->
                             </div>
                         <%
                                 }
@@ -548,44 +699,103 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="fecha">Fecha del Registro *</label>
-                    <input type="date" id="fecha" name="fecha" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Estado del Cumplimiento *</label>
-                    <div class="estado-options">
-                        <div class="estado-card cumplido">
-                            <input type="radio" id="cumplido" name="estado" value="CUMPLIDO" required>
-                            <label for="cumplido">
-                                <span class="estado-icon">✅</span>
-                                <div class="estado-content">Cumplido</div>
-                            </label>
+                <!-- ✅ NUEVO: Formulario de registro (oculto inicialmente, se clonará) -->
+                <div id="formularioRegistroTemplate" style="display: none;">
+                    <div class="formulario-registro-dinamico">
+                        <div class="form-group">
+                            <label for="fecha">Fecha del Registro *</label>
+                            <input type="date" id="fecha" name="fecha" required>
                         </div>
-                        <div class="estado-card no-cumplido">
-                            <input type="radio" id="noCumplido" name="estado" value="NO_CUMPLIDO">
-                            <label for="noCumplido">
-                                <span class="estado-icon">❌</span>
-                                <div class="estado-content">No Cumplido</div>
-                            </label>
+                        
+                        <div class="form-group">
+                            <label>¿Completaste el hábito? *</label>
+                            <div class="estado-options">
+                                <div class="estado-card cumplido">
+                                    <input type="radio" name="estado" value="CUMPLIDO" required>
+                                    <label>
+                                        <span class="estado-icon">✅</span>
+                                        <div class="estado-content">Cumplido</div>
+                                    </label>
+                                </div>
+                                <div class="estado-card no-cumplido">
+                                    <input type="radio" name="estado" value="NO_CUMPLIDO">
+                                    <label>
+                                        <span class="estado-icon">❌</span>
+                                        <div class="estado-content">No Cumplido</div>
+                                    </label>
+                                </div>
+                                <div class="estado-card parcial">
+                                    <input type="radio" name="estado" value="PARCIAL">
+                                    <label>
+                                        <span class="estado-icon">⏳</span>
+                                        <div class="estado-content">Parcial</div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="estado-card parcial">
-                            <input type="radio" id="parcial" name="estado" value="PARCIAL">
-                            <label for="parcial">
-                                <span class="estado-icon">⏳</span>
-                                <div class="estado-content">Parcial</div>
-                            </label>
+                        
+                        <div class="form-group">
+                            <label for="vecesRealizado">¿Cuántas veces lo realizaste? *</label>
+                            <input type="number" 
+                                   id="vecesRealizado" 
+                                   name="vecesRealizado" 
+                                   min="0" 
+                                   value="1" 
+                                   required
+                                   style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; width: 100%; font-size: 14px;">
+                        </div>
+                        
+                        <!-- ✅ NUEVO: Estado de Ánimo al registrar cumplimiento -->
+                        <div class="form-group">
+                            <label>¿Cómo te sientes hoy? 😊</label>
+                            <div class="animo-grid">
+                                <label class="animo-emoji">
+                                    <input type="radio" name="estadoAnimo" value="muy_feliz">
+                                    <span>😁</span>
+                                </label>
+                                <label class="animo-emoji">
+                                    <input type="radio" name="estadoAnimo" value="feliz">
+                                    <span>😊</span>
+                                </label>
+                                <label class="animo-emoji">
+                                    <input type="radio" name="estadoAnimo" value="neutral" checked>
+                                    <span>😐</span>
+                                </label>
+                                <label class="animo-emoji">
+                                    <input type="radio" name="estadoAnimo" value="triste">
+                                    <span>😔</span>
+                                </label>
+                                <label class="animo-emoji">
+                                    <input type="radio" name="estadoAnimo" value="muy_triste">
+                                    <span>😢</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notas">Notas</label>
+                            <textarea id="notas" name="notas" 
+                                      placeholder="¿Cómo te fue? ¿Qué aprendiste? (Opcional)"
+                                      style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; width: 100%; min-height: 80px; font-size: 14px; font-family: inherit;"></textarea>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="button" class="btn-secondary" onclick="cancelarRegistro()">
+                                ✖️ Cancelar
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                ✓ Guardar Registro
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Pomodoro Timer Section -->
-            <div class="pomodoro-section">
+            <!-- Pomodoro Timer Section (Opcional - se muestra aparte) -->
+            <div class="pomodoro-section" style="margin-top: 2rem;">
                 <div class="pomodoro-header">
                     <span style="font-size: 32px;">🍅</span>
-                    <h2 class="pomodoro-title">Temporizador Pomodoro</h2>
+                    <h2 class="pomodoro-title">Temporizador Pomodoro (Opcional)</h2>
                 </div>
                 
                 <div class="timer-state state-trabajo" id="timerState">
@@ -628,43 +838,7 @@
                 </div>
             </div>
             
-            <div class="registro-section">
-                <h2 style="color: #555555; margin-bottom: 20px;">😊 Estado de Ánimo</h2>
-                
-                <div class="form-group">
-                    <label>¿Cómo te sientes?</label>
-                    <div class="animo-grid">
-                        <div class="animo-emoji">
-                            <input type="radio" id="muy-mal" name="estadoAnimo" value="MUY_MAL">
-                            <label for="muy-mal">😢</label>
-                        </div>
-                        <div class="animo-emoji">
-                            <input type="radio" id="mal" name="estadoAnimo" value="MAL">
-                            <label for="mal">😞</label>
-                        </div>
-                        <div class="animo-emoji">
-                            <input type="radio" id="neutral" name="estadoAnimo" value="NEUTRAL" checked>
-                            <label for="neutral">😐</label>
-                        </div>
-                        <div class="animo-emoji">
-                            <input type="radio" id="bien" name="estadoAnimo" value="BIEN">
-                            <label for="bien">😊</label>
-                        </div>
-                        <div class="animo-emoji">
-                            <input type="radio" id="muy-bien" name="estadoAnimo" value="MUY_BIEN">
-                            <label for="muy-bien">😄</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="observacion">Observaciones</label>
-                    <textarea id="observacion" name="observacion" 
-                              placeholder="¿Cómo te fue hoy? ¿Qué aprendiste?"></textarea>
-                </div>
-            </div>
-            
-            <div class="btn-group">
+            <div class="btn-group" style="margin-top: 2rem;">
                 <button type="button" class="btn-secondary" onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
                     🏠 Volver al Dashboard
                 </button>
@@ -679,11 +853,16 @@
         // Auto-seleccionar fecha actual
         document.getElementById('fecha').valueAsDate = new Date();
         
-        // Función para seleccionar hábito
+        // ✅ NUEVO: Función para seleccionar hábito e insertar formulario debajo
         function selectHabito(card, habitoId) {
-            // Remover selección previa
+            // Remover selección previa y formularios previos
             document.querySelectorAll('.habito-card-select').forEach(c => {
                 c.classList.remove('selected');
+            });
+            
+            // Eliminar formularios existentes
+            document.querySelectorAll('.formulario-registro-dinamico').forEach(f => {
+                f.remove();
             });
             
             // Seleccionar card actual
@@ -697,19 +876,58 @@
             if (radio) {
                 radio.checked = true;
             }
+            
+            // ✅ Clonar e insertar formulario debajo de esta card
+            const template = document.getElementById('formularioRegistroTemplate');
+            const formulario = template.cloneNode(true);
+            formulario.id = 'formularioActivo';
+            formulario.style.display = 'block';
+            
+            // Obtener la meta diaria del hábito
+            const metaDiaria = card.getAttribute('data-meta');
+            const inputVeces = formulario.querySelector('[name="vecesRealizado"]');
+            if (inputVeces && metaDiaria) {
+                inputVeces.value = metaDiaria;
+                inputVeces.setAttribute('max', metaDiaria * 3); // Máximo 3x la meta
+            }
+            
+            // Insertar después de la card
+            const wrapper = card.closest('.habito-wrapper');
+            wrapper.appendChild(formulario.firstElementChild);
+            
+            // Scroll suave al formulario
+            setTimeout(() => {
+                formulario.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+            
+            console.log('📝 Hábito seleccionado:', habitoId, '| Meta diaria:', metaDiaria);
+        }
+        
+        // ✅ NUEVO: Función para cancelar registro
+        function cancelarRegistro() {
+            // Eliminar formulario y quitar selección
+            document.querySelectorAll('.formulario-registro-dinamico').forEach(f => {
+                f.remove();
+            });
+            document.querySelectorAll('.habito-card-select').forEach(c => {
+                c.classList.remove('selected');
+            });
+            document.getElementById('habitoId').value = '';
+            console.log('❌ Registro cancelado');
         }
         
         // Búsqueda de hábitos
         document.getElementById('searchHabito').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.habito-card-select');
+            const wrappers = document.querySelectorAll('.habito-wrapper');
             
-            cards.forEach(card => {
+            wrappers.forEach(wrapper => {
+                const card = wrapper.querySelector('.habito-card-select');
                 const habitoNombre = card.getAttribute('data-habito-nombre');
                 if (habitoNombre.includes(searchTerm)) {
-                    card.style.display = 'block';
+                    wrapper.style.display = 'flex';
                 } else {
-                    card.style.display = 'none';
+                    wrapper.style.display = 'none';
                 }
             });
             
@@ -915,6 +1133,23 @@
                 cicloActual = state.cicloActual || 1;
                 updateDisplay();
             }
+        });
+        
+        // 🎨 FUNCIONES DE LOADING
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        // Mostrar loading al enviar formulario
+        document.querySelector('form').addEventListener('submit', function() {
+            showLoading();
+        });
+        
+        // Mostrar loading en enlaces de navegación
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => showLoading(), 100);
+            });
         });
     </script>
 </body>

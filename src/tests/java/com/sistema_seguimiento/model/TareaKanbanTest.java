@@ -17,18 +17,18 @@ public class TareaKanbanTest {
         TareaKanban nuevaTarea = new TareaKanban("Diseñar la vista del kanban");
 
         assertNotNull(nuevaTarea);
-        assertEquals(TareaKanban.EstadoKanban.PENDIENTE, nuevaTarea.getEstado());
+        assertEquals(TareaKanban.EstadoKanban.POR_HACER, nuevaTarea.getEstado());
     }
 
     private static Stream<Arguments> proovedorDeMovimientosKanban(){
         return Stream.of(
 //          Movimientos VÁLIDOS
-                Arguments.of(TareaKanban.EstadoKanban.PENDIENTE, TareaKanban.EstadoKanban.EN_PROGRESO, true),
+                Arguments.of(TareaKanban.EstadoKanban.POR_HACER, TareaKanban.EstadoKanban.EN_PROGRESO, true),
                 Arguments.of(TareaKanban.EstadoKanban.EN_PROGRESO, TareaKanban.EstadoKanban.COMPLETADO, true),
-                Arguments.of(TareaKanban.EstadoKanban.EN_PROGRESO, TareaKanban.EstadoKanban.PENDIENTE, true),
+                Arguments.of(TareaKanban.EstadoKanban.EN_PROGRESO, TareaKanban.EstadoKanban.POR_HACER, true),
 
 //          Movimientos INVÁLIDOS
-                Arguments.of(TareaKanban.EstadoKanban.PENDIENTE, TareaKanban.EstadoKanban.COMPLETADO, false),
+                Arguments.of(TareaKanban.EstadoKanban.POR_HACER, TareaKanban.EstadoKanban.COMPLETADO, false),
                 Arguments.of(TareaKanban.EstadoKanban.COMPLETADO, TareaKanban.EstadoKanban.EN_PROGRESO, false)
         );
     }

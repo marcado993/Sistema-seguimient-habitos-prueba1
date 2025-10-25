@@ -15,12 +15,69 @@
             box-sizing: border-box;
         }
         
+        /* 🎨 EFECTO DE CARGA - FADE IN */
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: #E9F7EF;
             min-height: 100vh;
             padding: 20px;
             color: #555555;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 💫 LOADING SPINNER */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(233, 247, 239, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #D5F5E3;
+            border-top: 4px solid #27AE60;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            position: absolute;
+            margin-top: 90px;
+            color: #27AE60;
+            font-weight: 600;
+            font-size: 14px;
         }
         
         .container {
@@ -112,6 +169,8 @@
         .frecuencia-option:hover {
             border-color: #FFD6A5;
             background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 214, 165, 0.3);
         }
         
         .frecuencia-option input[type="radio"] {
@@ -119,6 +178,17 @@
         }
         
         .frecuencia-option input[type="radio"]:checked + label {
+            color: #555555;
+            font-weight: 700;
+        }
+        
+        .frecuencia-option.selected {
+            border-color: #A8E6CF;
+            background: white;
+            box-shadow: 0 4px 12px rgba(168, 230, 207, 0.4);
+        }
+        
+        .frecuencia-option.selected label {
             color: #555555;
             font-weight: 700;
         }
@@ -277,6 +347,14 @@
     </style>
 </head>
 <body>
+    <!-- 💫 LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner"></div>
+            <div class="loading-text">Cargando...</div>
+        </div>
+    </div>
+    
     <div class="container">
         <!-- Header con botón de retorno -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -288,12 +366,15 @@
         
         <%
             List<Objetivo> objetivos = (List<Objetivo>) request.getAttribute("objetivos");
-            Long objetivoRecienCreado = (Long) request.getAttribute("objetivoRecienCreado");
+            Integer objetivoRecienCreado = (Integer) session.getAttribute("objetivoRecienCreado");
             String mensaje = (String) session.getAttribute("mensaje");
             
-            // Limpiar mensaje de sesión
+            // Limpiar atributos de sesión después de usarlos
             if (mensaje != null) {
                 session.removeAttribute("mensaje");
+            }
+            if (objetivoRecienCreado != null) {
+                session.removeAttribute("objetivoRecienCreado");
             }
             
             if (objetivos != null && !objetivos.isEmpty()) {
@@ -319,7 +400,7 @@
             for (Objetivo objetivo : objetivos) { 
                 boolean esNuevo = objetivoRecienCreado != null && objetivo.getId().equals(objetivoRecienCreado);
                 String claseExtra = esNuevo ? " selected" : "";
-                Long objId = objetivo.getId();
+                Integer objId = objetivo.getId();
             %>
             <div class="objetivo-card<%= claseExtra %>" data-objetivo-id="<%= objId %>">
                 <div class="card-actions">
@@ -338,8 +419,8 @@
                 <h3>🎯 <%= objetivo.getTitulo() %></h3>
                 <p><%= objetivo.getDescripcion() != null ? objetivo.getDescripcion() : "Sin descripción" %></p>
                 <div class="objetivo-meta">
-                    <span>📅 <%= objetivo.getFechaCreacion().toLocalDate() %></span>
-                    <span>⏰ <%= objetivo.getFechaLimite() != null ? objetivo.getFechaLimite().toLocalDate() : "Sin límite" %></span>
+                    <span>📅 <%= objetivo.getFechaInicio() != null ? objetivo.getFechaInicio() : "Sin fecha" %></span>
+                    <span>⏰ <%= objetivo.getFechaFin() != null ? objetivo.getFechaFin() : "Sin límite" %></span>
                 </div>
             </div>
             <% } %>
@@ -391,7 +472,7 @@
                     <label>Frecuencia *</label>
                     <div class="frecuencia-options">
                         <div class="frecuencia-option">
-                            <input type="radio" id="diario" name="frecuencia" value="DIARIO" required>
+                            <input type="radio" id="diario" name="frecuencia" value="DIARIA" required>
                             <label for="diario">📅 Diario</label>
                         </div>
                         <div class="frecuencia-option">
@@ -409,6 +490,7 @@
                     <label for="fechaInicio">Fecha de Inicio *</label>
                     <input type="date" id="fechaInicio" name="fechaInicio" required>
                 </div>
+                
             </div>
             
             <div class="btn-group">
@@ -512,8 +594,19 @@
         // Mejorar UX de opciones de frecuencia
         document.querySelectorAll('.frecuencia-option').forEach(option => {
             option.addEventListener('click', function() {
+                // Remover selección previa
+                document.querySelectorAll('.frecuencia-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Marcar como seleccionado
+                this.classList.add('selected');
+                
+                // Seleccionar el radio button
                 const radio = this.querySelector('input[type="radio"]');
                 radio.checked = true;
+                
+                console.log('📅 Frecuencia seleccionada: ' + radio.value);
             });
         });
         
@@ -524,6 +617,33 @@
                 alert('⚠️ Por favor selecciona un objetivo primero');
                 return false;
             }
+            
+            // 💫 MOSTRAR LOADING AL ENVIAR
+            showLoading();
+        });
+        
+        // 🎨 FUNCIONES DE LOADING
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+        
+        // Mostrar loading en todos los botones/enlaces de navegación
+        document.querySelectorAll('a, button[type="submit"]').forEach(element => {
+            element.addEventListener('click', function(e) {
+                // No mostrar loading en botones de radio o elementos internos
+                if (this.type === 'radio' || this.classList.contains('frecuencia-option')) {
+                    return;
+                }
+                
+                // Mostrar loading con pequeño delay para mejor UX
+                setTimeout(() => {
+                    showLoading();
+                }, 100);
+            });
         });
     </script>
 </body>

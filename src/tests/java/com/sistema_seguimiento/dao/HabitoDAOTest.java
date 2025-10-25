@@ -39,13 +39,12 @@ public class HabitoDAOTest {
     public void given_Objetivo_when_Habito_then_CRUD(){
         Objetivo objetivoPadre = new Objetivo();
         objetivoPadre.setTitulo("Obj para Hábitos");
-        objetivoPadre.setUsuarioId("test_user");
+        objetivoPadre.setUsuarioId(1);
         Objetivo objetivoGuardado = objetivoDAO.save(objetivoPadre);
 
 
 //        CREATE
-        Habito nuevoHabito = new Habito("Leer 30 minutos", "Leer un libro de desarrollo personal", Habito.FrecuenciaHabito.DIARIO, 10, "test_user");
-        nuevoHabito.setObjetivo(objetivoGuardado);
+        Habito nuevoHabito = new Habito("Leer 30 minutos", "Leer un libro de desarrollo personal", Habito.FrecuenciaHabito.DIARIA, 10, 1);
 
         Habito habitoGuardaro = habitoDAO.save(nuevoHabito);
         assertNotNull("El hábito guardado debe tener un ID", habitoGuardaro.getId());
@@ -55,8 +54,6 @@ public class HabitoDAOTest {
         assertTrue("El hábito debería encontrarse en la BD", habitoRecuperadoOpt.isPresent());
         Habito habitoRecuperado = habitoRecuperadoOpt.get();
         assertEquals("Leer 30 minutos", habitoRecuperado.getNombre());
-        assertNotNull("El hábito recuperado debe tener un objetivo asociado", habitoRecuperado.getObjetivo());
-        assertEquals("El ID del ob asociado no coincide", objetivoGuardado.getId(), habitoRecuperado.getObjetivo().getId());
 
 //        UPDATE
         habitoRecuperado.setNombre("Leer 15 páginas al día");

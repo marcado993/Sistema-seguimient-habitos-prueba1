@@ -16,6 +16,7 @@
         <class>com.sistema_seguimiento.model.RegistroHabito</class>
         <class>com.sistema_seguimiento.model.Usuario</class>
         <class>com.sistema_seguimiento.model.TareaKanban</class>
+        <class>com.sistema_seguimiento.model.Pomodoro</class>
         
         <properties>
             <!-- Configuración de H2 en memoria para tests -->

@@ -79,17 +79,16 @@ public class ObjetivoDAOTest {
         Objetivo objetivoInicial = new Objetivo();
         objetivoInicial.setTitulo("Aprender TDD");
         objetivoInicial.setDescripcion("Implementar pruebas unitarias con JUnit");
-        objetivoInicial.setEstado(EstadoObjetivo.ACTIVO);
-        objetivoInicial.setProgreso(30); // Progreso inicial 30%
-        objetivoInicial.setUsuarioId("user123");
+        objetivoInicial.setEstado(EstadoObjetivo.EN_PROGRESO);
+        objetivoInicial.setProgresoActual(30); // Progreso inicial 30%
+        objetivoInicial.setUsuarioId(1);
         objetivoInicial.setFechaCreacion(LocalDateTime.now());
-        objetivoInicial.setFechaLimite(LocalDateTime.now().plusDays(30));
         
         em.getTransaction().begin();
         em.persist(objetivoInicial);
         em.getTransaction().commit();
         
-        Long objetivoId = objetivoInicial.getId();
+        Integer objetivoId = objetivoInicial.getId();
         assertNotNull("El objetivo debe tener un ID después de persistir", objetivoId);
         System.out.println("✅ Objetivo creado con ID: " + objetivoId + " y progreso inicial: 30%");
         
@@ -107,8 +106,8 @@ public class ObjetivoDAOTest {
         Objetivo objetivoActualizado = em.find(Objetivo.class, objetivoId);
         assertNotNull("El objetivo debe existir en la BD", objetivoActualizado);
         assertEquals("El progreso del objetivo debe ser 65%", 
-                     Integer.valueOf(65), objetivoActualizado.getProgreso());
-        System.out.println("✅ Objetivo actualizado: progreso = " + objetivoActualizado.getProgreso() + "%");
+                     Integer.valueOf(65), objetivoActualizado.getProgresoActual());
+        System.out.println("✅ Objetivo actualizado: progreso = " + objetivoActualizado.getProgresoActual() + "%");
         
         // 2. Verificar que se creó un RegistroProgreso
         List<RegistroProgreso> registros = em.createQuery(
@@ -149,7 +148,7 @@ public class ObjetivoDAOTest {
         System.out.println("\n🧪 Test: Actualizar progreso de objetivo inexistente");
         
         // ACT & ASSERT - Intentar actualizar un objetivo que no existe
-        Long objetivoIdInexistente = 99999L;
+        Integer objetivoIdInexistente = 99999;
         
         try {
             objetivoDAO.actualizarProgreso(objetivoIdInexistente, 50, "No debería crear nada");
