@@ -24,6 +24,16 @@ public class QuoteService {
     public String getDailyQuote() {
         // Usa el día del año para seleccionar una frase diferente cada día
         int dayOfYear = LocalDate.now().getDayOfYear();
+        return getDailyQuoteForDay(dayOfYear);
+    }
+    
+    /**
+     * Obtiene la frase diaria para un día específico
+     * Este método permite simular diferentes días para pruebas
+     * @param dayOfYear El día del año (1-365/366)
+     * @return Una frase motivacional correspondiente al día
+     */
+    public String getDailyQuoteForDay(int dayOfYear) {
         int quoteIndex = dayOfYear % quotes.size();
         return quotes.get(quoteIndex);
     }

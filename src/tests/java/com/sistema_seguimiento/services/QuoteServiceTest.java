@@ -52,5 +52,10 @@ public class QuoteServiceTest {
         assertNotNull(fraseDay2, "La frase del día 2 no debe ser nula");
         assertNotEquals(fraseDay1, fraseDay2, 
             "Las frases de días diferentes deben ser distintas");
+        
+        // Mensaje de prueba exitosa
+        System.out.println("[TEST PASSED] Prueba 2/8 - Cambio de dia: Las frases de dias diferentes son distintas");
+        System.out.println("  Frase dia 1: " + fraseDay1);
+        System.out.println("  Frase dia 2: " + fraseDay2);
     }
 }
