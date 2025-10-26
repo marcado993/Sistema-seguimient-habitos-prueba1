@@ -54,7 +54,7 @@ public class ControladorHabitosWithMockTest {
         Habito habitoMock = new Habito();
         habitoMock.setId(habitoId);
         habitoMock.setUsuarioId(usuarioId);
-        when(habitoDAO.findById(habitoId)).thenReturn(habitoMock);
+        when(habitoDAO.findById(habitoId)).thenReturn(Optional.of(habitoMock));
         
         // Act - Llamar directamente al método público del controlador
         Habito resultado = controlador.registrarCumplimiento(habitoId, fecha, notas);
