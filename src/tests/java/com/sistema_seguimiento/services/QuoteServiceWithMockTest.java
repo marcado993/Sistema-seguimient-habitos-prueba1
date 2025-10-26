@@ -31,10 +31,8 @@ public class QuoteServiceWithMockTest {
     }
     
     /**
-     * UNA PRUEBA CON MOCK (1/2) - TDD - FASE ROJA
+     * UNA PRUEBA CON MOCK (1/2) - TDD - FASE VERDE
      * Verifica que QuoteService inicializa las frases llamando a QuoteDAO.getQuotes()
-     * 
-     * NOTA: Esta prueba DEBE FALLAR porque QuoteService no tiene constructor que acepte QuoteDAO
      */
     @Test
     @DisplayName("QuoteService debe llamar a QuoteDAO.getQuotes() durante la inicializacion")
@@ -51,20 +49,26 @@ public class QuoteServiceWithMockTest {
         // Configurar el mock para devolver las frases de prueba
         when(quoteDAO.getQuotes()).thenReturn(mockQuotes);
         
-        System.out.println("[TEST FAILED] Prueba con Mock 1/2 - FASE ROJA");
-        System.out.println("  Error: El constructor QuoteService(QuoteDAO) no existe");
-        System.out.println("  Solucion: Implementar constructor que acepte QuoteDAO como parametro");
-        System.out.println("  Solucion: Modificar QuoteService para usar QuoteDAO.getQuotes()");
+        // Act
+        // Crear una nueva instancia que debería llamar a getQuotes() en su constructor
+        QuoteService service = new QuoteService(quoteDAO);
         
-        // Fallar explícitamente la prueba indicando que falta la implementación
-        fail("FASE ROJA: QuoteService no tiene constructor QuoteService(QuoteDAO). " +
-             "Se requiere implementar la inyeccion de dependencias para QuoteDAO.");
+        // Obtener una frase para verificar que se están usando las del DAO
+        String dailyQuote = service.getDailyQuote();
         
-        // El siguiente código no se ejecutará hasta que se implemente el constructor
-        // QuoteService service = new QuoteService(quoteDAO);
-        // String dailyQuote = service.getDailyQuote();
-        // verify(quoteDAO, times(1)).getQuotes();
-        // assertNotNull(dailyQuote, "La frase diaria no debe ser nula");
-        // assertTrue(mockQuotes.contains(dailyQuote), "La frase debe ser una de las proporcionadas por el DAO");
+        // Assert
+        // Verificar que getQuotes() fue llamado exactamente 1 vez
+        verify(quoteDAO, times(1)).getQuotes();
+        
+        // Verificar que la frase obtenida es una de las del mock
+        assertNotNull(dailyQuote, "La frase diaria no debe ser nula");
+        assertTrue(mockQuotes.contains(dailyQuote), 
+            "La frase debe ser una de las proporcionadas por el DAO");
+        
+        // Mensaje de prueba exitosa
+        System.out.println("[TEST PASSED] Prueba con Mock 1/2 - FASE VERDE completada exitosamente");
+        System.out.println("  QuoteService.getQuotes() fue llamado 1 vez");
+        System.out.println("  Frase obtenida: " + dailyQuote);
+        System.out.println("  La frase proviene correctamente del QuoteDAO mockeado");
     }
 }

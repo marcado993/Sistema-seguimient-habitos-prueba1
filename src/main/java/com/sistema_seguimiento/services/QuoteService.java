@@ -1,5 +1,6 @@
 package com.sistema_seguimiento.services;
 
+import com.sistema_seguimiento.dao.QuoteDAO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,14 +8,30 @@ import java.util.List;
 /**
  * Servicio para proporcionar frases diarias motivacionales
  * Implementado siguiendo TDD - Fase VERDE
+ * Soporta inyeccion de dependencias mediante QuoteDAO
  */
 public class QuoteService {
     
     private List<String> quotes;
+    private QuoteDAO quoteDAO;
     
+    /**
+     * Constructor sin parametros - Usa frases hardcodeadas
+     * Mantiene compatibilidad con codigo existente
+     */
     public QuoteService() {
         this.quotes = new ArrayList<>();
+        this.quoteDAO = null;
         initializeQuotes();
+    }
+    
+    /**
+     * Constructor con inyeccion de dependencias
+     * @param quoteDAO DAO para obtener las frases desde una fuente externa
+     */
+    public QuoteService(QuoteDAO quoteDAO) {
+        this.quoteDAO = quoteDAO;
+        this.quotes = quoteDAO.getQuotes();
     }
     
     /**
