@@ -32,7 +32,7 @@ public class TestSupabaseConnection {
         System.out.println("   Base de Datos: " + DB_NAME);
         System.out.println("   Usuario:  " + DB_USER);
         System.out.println();
-
+        //pequeño cambio
         // Intentar conexión
         testConnection();
     }
