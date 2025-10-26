@@ -134,6 +134,17 @@
             </a>
         </div>
         
+        <div class="section-title" style="margin-top: 2rem;">💭 Inspiración y Motivación</div>
+        <div class="section-divider"></div>
+        
+        <div class="dashboard-grid">
+            <a href="${pageContext.request.contextPath}/frases-motivacion" class="dashboard-card card-objetivo">
+                <div class="card-icon">✨</div>
+                <div class="card-title">Frases Motivacionales</div>
+                <div class="card-description">Descubre frases inspiradoras que te ayudarán a mantenerte enfocado en tus metas. Cambia de frase cuando lo necesites.</div>
+            </a>
+        </div>
+        
         <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
             <p style="font-family: 'Poppins', sans-serif; font-size: 18px; color: #555; margin-bottom: 10px; font-weight: 500; font-style: italic;">"El éxito es la suma de pequeños esfuerzos repetidos día tras día"</p>
             <p style="font-family: 'Poppins', sans-serif; font-size: 12px; color: #888;">Sistema de Seguimiento de Hábitos y Objetivos © 2025</p>
