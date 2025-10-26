@@ -83,8 +83,15 @@ public class UsuarioDAOAddPointsTest {
         // Assert
         assertTrue(resultado, "addPoints() debería retornar true");
         
+        // Limpiar la caché de primer nivel y refrescar desde BD
         em.clear();
-        Usuario usuarioActualizado = em.find(Usuario.class, usuarioId);
+        em.getEntityManagerFactory().getCache().evictAll();
+        
+        // Crear nuevo EntityManager para forzar lectura desde BD
+        EntityManager emFresh = emf.createEntityManager();
+        Usuario usuarioActualizado = emFresh.find(Usuario.class, usuarioId);
+        emFresh.close();
+        
         assertNotNull(usuarioActualizado, "El usuario debe existir");
         assertEquals(puntosEsperados, usuarioActualizado.getPuntos(),
             "Los puntos deben ser " + puntosEsperados);

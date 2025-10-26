@@ -244,15 +244,15 @@ public class UsuarioDAOJPA {
     }
     
     /**
-     * 🟢 FASE VERDE - Agregar puntos a un usuario (Código mínimo)
+     * Agregar puntos a un usuario
      * 
      * @param usuarioId ID del usuario
-     * @param cantidad Cantidad de puntos a agregar
-     * @return true si se agregaron correctamente, false en caso contrario
+     * @param puntos Cantidad de puntos a agregar (debe ser positivo)
+     * @return true si se agregaron los puntos, false si no
      */
-    public boolean addPoints(Integer usuarioId, int cantidad) {
-        // Validar que la cantidad sea positiva
-        if (cantidad <= 0) {
+    public boolean addPoints(Integer usuarioId, int puntos) {
+        // Validar entrada
+        if (usuarioId == null || puntos <= 0) {
             return false;
         }
         
@@ -273,12 +273,14 @@ public class UsuarioDAOJPA {
             
             // Agregar puntos
             Integer puntosActuales = usuario.getPuntos();
-            usuario.setPuntos(puntosActuales + cantidad);
+            usuario.setPuntos(puntosActuales + puntos);
             
+            // Guardar cambios
             em.merge(usuario);
             transaction.commit();
             
-            System.out.println("✓ Se agregaron " + cantidad + " puntos al usuario " + usuarioId);
+            System.out.println("✓ Agregados " + puntos + " puntos al usuario " + usuarioId + 
+                             ". Total: " + usuario.getPuntos());
             return true;
             
         } catch (Exception e) {

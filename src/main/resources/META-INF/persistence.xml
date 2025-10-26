@@ -39,7 +39,8 @@
             <!-- CRÍTICO: No validar esquema estrictamente -->
             <!-- Cambiar a "update" si necesitas que Hibernate cree nuevas tablas/columnas -->
             <!-- Cambiar a "create-drop" solo para desarrollo/testing -->
-            <property name="hibernate.hbm2ddl.auto" value="none"/>
+            <!-- 🟢 FASE VERDE: Temporalmente en "update" para agregar columna puntos -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
 
             <!-- Mostrar SQL en consola (útil para debugging) -->
             <property name="hibernate.show_sql" value="false"/>
