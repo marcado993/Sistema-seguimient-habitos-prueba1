@@ -59,28 +59,35 @@ public class ControladorHabitosWithMockTest {
         Integer habitoId = 100;
         String estado = "CUMPLIDO";
         
+        // Mock del Usuario en sesión
+        com.sistema_seguimiento.model.Usuario usuarioMock = new com.sistema_seguimiento.model.Usuario();
+        usuarioMock.setId(usuarioId);
+        usuarioMock.setNombre("Test User");
+        
         when(request.getParameter("action")).thenReturn("registrar");
         when(request.getParameter("habitoId")).thenReturn(habitoId.toString());
         when(request.getParameter("estado")).thenReturn(estado);
         when(request.getParameter("notas")).thenReturn("Test notas");
         when(request.getParameter("fecha")).thenReturn(LocalDate.now().toString());
-        when(session.getAttribute("usuarioId")).thenReturn(usuarioId);
+        when(session.getAttribute("usuario")).thenReturn(usuarioMock); // FIX: "usuario" no "usuarioId"
         
-        // Mock del HabitoDAO para simular guardado exitoso
+        // Mock del Habito
         Habito habitoMock = new Habito();
         habitoMock.setId(habitoId);
         habitoMock.setNombre("Hábito Test");
         habitoMock.setUsuarioId(usuarioId);
         
-        // El HabitoDAO debe devolver el hábito cuando se busque por ID
-        when(habitoDAO.findById(habitoId)).thenReturn(java.util.Optional.of(habitoMock));
+        // Mock del RegistroHabito guardado exitosamente
+        com.sistema_seguimiento.model.RegistroHabito registroGuardado = 
+            new com.sistema_seguimiento.model.RegistroHabito();
+        registroGuardado.setId(999);
+        registroGuardado.setHabito(habitoMock);
+        registroGuardado.setFecha(LocalDate.now());
+        registroGuardado.setCompletado(true);
         
-        // 🔧 FIX: Mockear saveRegistro para que el servlet continúe
-        when(habitoDAO.saveRegistro(any())).thenAnswer(invocation -> {
-            com.sistema_seguimiento.model.RegistroHabito registro = invocation.getArgument(0);
-            registro.setId(999); // Simular que se guardó con ID
-            return registro;
-        });
+        // Mocks del HabitoDAO
+        when(habitoDAO.findById(habitoId)).thenReturn(java.util.Optional.of(habitoMock));
+        when(habitoDAO.saveRegistro(any())).thenReturn(registroGuardado);
         
         // Inyectar mocks en el controlador
         controlador.setHabitoDAO(habitoDAO);
