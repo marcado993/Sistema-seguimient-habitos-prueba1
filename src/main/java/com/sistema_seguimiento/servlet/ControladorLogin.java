@@ -2,6 +2,7 @@ package com.sistema_seguimiento.servlet;
 
 import com.sistema_seguimiento.dao.UsuarioDAOJPA;
 import com.sistema_seguimiento.model.Usuario;
+import com.sistema_seguimiento.services.QuoteService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -19,11 +21,13 @@ import java.util.Optional;
 public class ControladorLogin extends HttpServlet {
     
     private UsuarioDAOJPA usuarioDAO;
+    private QuoteService quoteService;
     
     @Override
     public void init() throws ServletException {
         super.init();
         usuarioDAO = new UsuarioDAOJPA();
+        quoteService = new QuoteService();
         
         // Crear usuario demo si no existe
         if (!usuarioDAO.findByCorreo("demo@ejemplo.com").isPresent()) {
@@ -108,9 +112,23 @@ public class ControladorLogin extends HttpServlet {
                 
                 // Crear sesión
                 HttpSession session = request.getSession();
+                
+                // Verificar si es el primer login del día
+                String ultimaFechaLogin = (String) session.getAttribute("ultimaFechaLogin");
+                String fechaHoy = LocalDate.now().toString();
+                boolean esPrimerLoginDelDia = !fechaHoy.equals(ultimaFechaLogin);
+                
                 session.setAttribute("usuario", usuario);
                 session.setAttribute("correo", usuario.getCorreo());
                 session.setAttribute("nombre", usuario.getNombre());
+                session.setAttribute("ultimaFechaLogin", fechaHoy);
+                
+                // Si es primer login del día, obtener frase diaria
+                if (esPrimerLoginDelDia) {
+                    String fraseDiaria = quoteService.getDailyQuote();
+                    session.setAttribute("mostrarFraseDiaria", true);
+                    session.setAttribute("fraseDiaria", fraseDiaria);
+                }
                 
                 System.out.println("✓ Login exitoso para: " + correo);
                 

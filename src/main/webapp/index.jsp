@@ -11,6 +11,15 @@
     // Si está logueado, obtener información del usuario
     String nombreUsuario = (String) currentSession.getAttribute("nombre");
     String correoUsuario = (String) currentSession.getAttribute("correo");
+    
+    // Verificar si debe mostrar la frase diaria
+    Boolean mostrarFrase = (Boolean) currentSession.getAttribute("mostrarFraseDiaria");
+    String fraseDiaria = (String) currentSession.getAttribute("fraseDiaria");
+    
+    // Limpiar el atributo para que no se muestre de nuevo en la misma sesión
+    if (mostrarFrase != null && mostrarFrase) {
+        currentSession.removeAttribute("mostrarFraseDiaria");
+    }
 %>
 <!DOCTYPE html>
 <html>
@@ -47,10 +56,29 @@
         .card-description { font-size: 14px; color: #888; line-height: 1.6; }
         .section-title { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; color: #555; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
         .section-divider { height: 3px; background: linear-gradient(90deg, #A8E6CF, transparent); margin-bottom: 1.5rem; border-radius: 2px; }
+        
+        /* Estilos para la ventana emergente de frase diaria */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; animation: fadeIn 0.3s ease; }
+        .modal-overlay.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 3rem 2.5rem; border-radius: 20px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); position: relative; animation: slideIn 0.4s ease; }
+        .modal-header { text-align: center; margin-bottom: 1.5rem; }
+        .modal-icon { font-size: 60px; margin-bottom: 10px; }
+        .modal-title { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; color: #555; margin-bottom: 5px; }
+        .modal-subtitle { font-family: 'Dancing Script', cursive; font-size: 16px; color: #888; }
+        .modal-quote { font-family: 'Dancing Script', cursive; font-size: 22px; color: #555; line-height: 1.6; text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #A8E6CF20, #FFD6A520); border-radius: 12px; border-left: 4px solid #A8E6CF; }
+        .modal-footer { text-align: center; }
+        .btn-close-modal { background: linear-gradient(135deg, #A8E6CF, #FFD6A5); color: #555; padding: 12px 30px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-close-modal:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             .user-info { flex-direction: column; }
             .dashboard-grid { grid-template-columns: 1fr; }
+            .modal-content { padding: 2rem 1.5rem; }
+            .modal-quote { font-size: 18px; }
         }
     </style>
 </head>
@@ -111,5 +139,51 @@
             <p style="font-size: 12px; color: #888;">Sistema de Seguimiento de Hábitos y Objetivos © 2025</p>
         </div>
     </div>
+    
+    <!-- Modal de frase diaria -->
+    <% if (mostrarFrase != null && mostrarFrase && fraseDiaria != null) { %>
+    <div id="quoteModal" class="modal-overlay show">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">✨</div>
+                <div class="modal-title">¡Bienvenido de nuevo!</div>
+                <div class="modal-subtitle">Tu frase inspiradora del día</div>
+            </div>
+            <div class="modal-quote">
+                "<%= fraseDiaria %>"
+            </div>
+            <div class="modal-footer">
+                <button class="btn-close-modal" onclick="cerrarModal()">¡Empecemos! 🚀</button>
+            </div>
+        </div>
+    </div>
+    <% } %>
+    
+    <script>
+        function cerrarModal() {
+            const modal = document.getElementById('quoteModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('quoteModal');
+            if (modal && event.target === modal) {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar modal con la tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+    </script>
 </body>
 </html>
