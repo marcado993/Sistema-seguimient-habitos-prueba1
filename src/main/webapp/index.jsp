@@ -27,14 +27,14 @@
     <title>Dashboard - Sistema de Seguimiento</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #E9F7EF; min-height: 100vh; padding: 20px; color: #555; }
+        body { font-family: 'Poppins', sans-serif; background: #E9F7EF; min-height: 100vh; padding: 20px; color: #555; }
         .container { max-width: 1200px; margin: 0 auto; }
         .header { background: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .header-left h1 { font-family: 'Poppins', sans-serif; color: #555; font-size: 32px; font-weight: 700; margin-bottom: 5px; }
-        .header-left .subtitle { font-family: 'Dancing Script', cursive; color: #888; font-size: 18px; }
+        .header-left .subtitle { font-family: 'Poppins', sans-serif; color: #888; font-size: 18px; font-weight: 500; }
         .user-info { background: linear-gradient(135deg, #A8E6CF, #FFD6A5); color: #555; padding: 15px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .user-details .welcome { font-size: 12px; opacity: 0.8; }
@@ -64,8 +64,8 @@
         .modal-header { text-align: center; margin-bottom: 1.5rem; }
         .modal-icon { font-size: 60px; margin-bottom: 10px; }
         .modal-title { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; color: #555; margin-bottom: 5px; }
-        .modal-subtitle { font-family: 'Dancing Script', cursive; font-size: 16px; color: #888; }
-        .modal-quote { font-family: 'Dancing Script', cursive; font-size: 22px; color: #555; line-height: 1.6; text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #A8E6CF20, #FFD6A520); border-radius: 12px; border-left: 4px solid #A8E6CF; }
+        .modal-subtitle { font-family: 'Poppins', sans-serif; font-size: 16px; color: #888; font-weight: 500; }
+        .modal-quote { font-family: 'Poppins', sans-serif; font-size: 20px; color: #555; line-height: 1.6; text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #A8E6CF20, #FFD6A520); border-radius: 12px; border-left: 4px solid #A8E6CF; font-weight: 500; font-style: italic; }
         .modal-footer { text-align: center; }
         .btn-close-modal { background: linear-gradient(135deg, #A8E6CF, #FFD6A5); color: #555; padding: 12px 30px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .btn-close-modal:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
@@ -135,8 +135,8 @@
         </div>
         
         <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
-            <p style="font-family: 'Dancing Script', cursive; font-size: 20px; color: #555; margin-bottom: 10px;">"El éxito es la suma de pequeños esfuerzos repetidos día tras día"</p>
-            <p style="font-size: 12px; color: #888;">Sistema de Seguimiento de Hábitos y Objetivos © 2025</p>
+            <p style="font-family: 'Poppins', sans-serif; font-size: 18px; color: #555; margin-bottom: 10px; font-weight: 500; font-style: italic;">"El éxito es la suma de pequeños esfuerzos repetidos día tras día"</p>
+            <p style="font-family: 'Poppins', sans-serif; font-size: 12px; color: #888;">Sistema de Seguimiento de Hábitos y Objetivos © 2025</p>
         </div>
     </div>
     
