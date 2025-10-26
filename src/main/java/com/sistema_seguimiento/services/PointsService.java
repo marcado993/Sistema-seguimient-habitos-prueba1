@@ -4,9 +4,7 @@ import com.sistema_seguimiento.dao.UsuarioDAOJPA;
 import java.util.logging.Logger;
 
 /**
- * 🟢 FASE VERDE - Servicio para cálculo de puntos (Código Mínimo)
- * 
- * Implementación mínima para hacer pasar los tests
+ * Servicio para cálculo de puntos del sistema de gamificación
  */
 public class PointsService {
     

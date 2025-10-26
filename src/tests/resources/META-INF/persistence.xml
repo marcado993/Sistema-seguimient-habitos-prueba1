@@ -37,4 +37,36 @@
         </properties>
     </persistence-unit>
     
+    <!-- 🟢 FASE VERDE - Persistence Unit adicional para UsuarioDAOAddPointsTest -->
+    <persistence-unit name="TestPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
+        <!-- Clases de entidad -->
+        <class>com.sistema_seguimiento.model.Usuario</class>
+        <class>com.sistema_seguimiento.model.Objetivo</class>
+        <class>com.sistema_seguimiento.model.RegistroProgreso</class>
+        <class>com.sistema_seguimiento.model.Habito</class>
+        <class>com.sistema_seguimiento.model.RegistroHabito</class>
+        <class>com.sistema_seguimiento.model.TareaKanban</class>
+        <class>com.sistema_seguimiento.model.Pomodoro</class>
+        
+        <properties>
+            <!-- Configuración de H2 en memoria para tests -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:testpu_db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+            
+            <!-- Configuración de Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="true"/>
+            
+            <!-- Configuración adicional -->
+            <property name="hibernate.connection.pool_size" value="1"/>
+            <property name="hibernate.current_session_context_class" value="thread"/>
+        </properties>
+    </persistence-unit>
+    
 </persistence>

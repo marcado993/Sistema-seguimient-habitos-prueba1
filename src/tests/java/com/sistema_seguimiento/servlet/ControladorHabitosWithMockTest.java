@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -73,6 +74,13 @@ public class ControladorHabitosWithMockTest {
         
         // El HabitoDAO debe devolver el hábito cuando se busque por ID
         when(habitoDAO.findById(habitoId)).thenReturn(java.util.Optional.of(habitoMock));
+        
+        // 🔧 FIX: Mockear saveRegistro para que el servlet continúe
+        when(habitoDAO.saveRegistro(any())).thenAnswer(invocation -> {
+            com.sistema_seguimiento.model.RegistroHabito registro = invocation.getArgument(0);
+            registro.setId(999); // Simular que se guardó con ID
+            return registro;
+        });
         
         // Inyectar mocks en el controlador
         controlador.setHabitoDAO(habitoDAO);
