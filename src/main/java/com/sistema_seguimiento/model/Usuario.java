@@ -30,10 +30,18 @@ public class Usuario {
     @Column(columnDefinition = "boolean default true")
     private Boolean activo;
     
+    /**
+     * 🟢 FASE VERDE - Campo puntos para gamificación
+     * @since 2.0
+     */
+    @Column(name = "puntos", nullable = false)
+    private Integer puntos = 0;
+    
     // Constructores
     public Usuario() {
         this.fechaRegistro = LocalDateTime.now();
         this.activo = true;
+        this.puntos = 0;
     }
     
     public Usuario(String nombre, String correo, String contrasena) {
@@ -118,12 +126,44 @@ public class Usuario {
         this.activo = activo;
     }
     
+    /**
+     * 🟢 FASE VERDE - Getter para puntos
+     * @return puntos del usuario
+     */
+    public Integer getPuntos() {
+        return puntos;
+    }
+    
+    /**
+     * 🟢 FASE VERDE - Setter para puntos
+     * @param puntos nuevos puntos
+     */
+    public void setPuntos(Integer puntos) {
+        this.puntos = puntos != null ? puntos : 0;
+    }
+    
+    /**
+     * 🟢 FASE VERDE - Métodos adicionales para tests
+     */
+    public void setUsername(String nombre) {
+        this.nombre = nombre;
+    }
+    
+    public void setEmail(String correo) {
+        this.correo = correo;
+    }
+    
+    public void setPassword(String contrasena) {
+        this.contrasena = contrasena;
+    }
+    
     @Override
     public String toString() {
         return "Usuario{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", correo='" + correo + '\'' +
+                ", puntos=" + puntos +
                 ", fechaRegistro=" + fechaRegistro +
                 ", activo=" + activo +
                 '}';

@@ -242,4 +242,53 @@ public class UsuarioDAOJPA {
             em.close();
         }
     }
+    
+    /**
+     * 🟢 FASE VERDE - Agregar puntos a un usuario (Código mínimo)
+     * 
+     * @param usuarioId ID del usuario
+     * @param cantidad Cantidad de puntos a agregar
+     * @return true si se agregaron correctamente, false en caso contrario
+     */
+    public boolean addPoints(Integer usuarioId, int cantidad) {
+        // Validar que la cantidad sea positiva
+        if (cantidad <= 0) {
+            return false;
+        }
+        
+        EntityManager em = EntityManagerUtil.getEntityManager();
+        EntityTransaction transaction = null;
+        
+        try {
+            transaction = em.getTransaction();
+            transaction.begin();
+            
+            // Buscar usuario
+            Usuario usuario = em.find(Usuario.class, usuarioId);
+            
+            if (usuario == null) {
+                transaction.rollback();
+                return false;
+            }
+            
+            // Agregar puntos
+            Integer puntosActuales = usuario.getPuntos();
+            usuario.setPuntos(puntosActuales + cantidad);
+            
+            em.merge(usuario);
+            transaction.commit();
+            
+            System.out.println("✓ Se agregaron " + cantidad + " puntos al usuario " + usuarioId);
+            return true;
+            
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            System.err.println("✗ Error al agregar puntos: " + e.getMessage());
+            return false;
+        } finally {
+            em.close();
+        }
+    }
 }

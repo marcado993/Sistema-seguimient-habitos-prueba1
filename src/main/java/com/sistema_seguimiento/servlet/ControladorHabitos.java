@@ -5,6 +5,7 @@ import com.sistema_seguimiento.model.Habito;
 import com.sistema_seguimiento.model.RegistroHabito;
 import com.sistema_seguimiento.model.Usuario;
 import com.sistema_seguimiento.services.HabitoServicio;
+import com.sistema_seguimiento.services.PointsService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,16 +20,37 @@ import java.util.List;
 /**
  * Controlador de Hábitos según el diagrama de clases
  * Maneja las operaciones relacionadas con hábitos
+ * 
+ * 🟢 FASE VERDE - Integrado con PointsService
  */
 @WebServlet("/controlador-habitos")
 public class ControladorHabitos extends HttpServlet {
 
     private final HabitoServicio habitoServicio = new HabitoServicio();
+    
+    /**
+     * 🟢 FASE VERDE - PointsService para gamificación
+     */
+    private PointsService pointsService = new PointsService();
 
     @Override
     public void init() throws ServletException {
         super.init();
         habitoServicio.setHabitoDAO(new HabitoDAO());
+    }
+    
+    /**
+     * 🟢 FASE VERDE - Setter para inyección de dependencias (usado en tests)
+     */
+    public void setHabitoDAO(HabitoDAO habitoDAO) {
+        habitoServicio.setHabitoDAO(habitoDAO);
+    }
+    
+    /**
+     * 🟢 FASE VERDE - Setter para inyección de PointsService (usado en tests)
+     */
+    public void setPointsService(PointsService pointsService) {
+        this.pointsService = pointsService;
     }
     
     /**
@@ -286,6 +308,13 @@ public class ControladorHabitos extends HttpServlet {
                 
                 if (habito != null) {
                     System.out.println("✅ Registro exitoso del hábito ID: " + habitoId);
+                    
+                    // 🟢 FASE VERDE - Agregar puntos al usuario después del registro exitoso
+                    if (estadoStr != null && pointsService != null) {
+                        pointsService.addPointsToUser(usuarioId, estadoStr);
+                        System.out.println("🎮 Puntos procesados para estado: " + estadoStr);
+                    }
+                    
                     response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
                 } else {
                     System.out.println("❌ Error al registrar hábito");
