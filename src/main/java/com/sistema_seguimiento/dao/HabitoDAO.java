@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * DAO para gestión de Hábitos
- * 
+ *
  * Proporciona operaciones CRUD y consultas específicas para la gestión
  * de hábitos, registros de hábitos y estadísticas.
  */
@@ -270,6 +270,32 @@ public class HabitoDAO {
             Long completados = queryCompletados.getSingleResult();
 
             return (completados * 100.0) / (habitosActivos * 7);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Cuenta el número total de días en que un usuario ha cumplido
+     * la meta diaria para CUALQUIERA de sus hábitos activos.
+     * @param usuarioId ID del usuario
+     * @return Número total de días con hábitos cumplidos
+     */
+    public long countTotalHabitosCumplidosPorUsuario(Integer usuarioId) {
+        EntityManager em = EntityManagerUtil.getEntityManager();
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(DISTINCT r.fecha) FROM RegistroHabito r " +
+                            "WHERE r.habito.usuarioId = :usuarioId " +
+                            "AND r.habito.activo = true " +
+                            "AND r.completado = true", // Asumiendo que 'completado' refleja si la meta se cumplió ese día
+                    Long.class);
+            query.setParameter("usuarioId", usuarioId);
+            Long count = query.getSingleResult();
+            return count != null ? count : 0L;
+        } catch (Exception e) {
+            System.err.println("Error contando hábitos cumplidos para usuario " + usuarioId + ": " + e.getMessage());
+            return 0L; // Devolver 0 en caso de error
         } finally {
             em.close();
         }
