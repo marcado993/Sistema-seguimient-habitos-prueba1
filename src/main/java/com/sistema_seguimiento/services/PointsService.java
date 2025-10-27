@@ -41,28 +41,37 @@ public class PointsService {
     }
     
     /**
-     * 🟢 Agrega puntos a un usuario según el estado del hábito
+     * ANTES: Método monolítico con múltiples responsabilidades
      * 
-     * @param usuarioId ID del usuario
-     * @param estado Estado del hábito
+     * public void addPointsToUser(Integer usuarioId, String estado) {
+     *     if (usuarioId == null) return;
+     *     int puntos = calculatePoints(estado);
+     *     if (puntos > 0) {
+     *         usuarioDAO.addPoints(usuarioId, puntos);
+     *     }
+     * }
+     */
+    
+    /**
+     * DESPUÉS: Separado en 3 responsabilidades claras
      */
     public void addPointsToUser(Integer usuarioId, String estado) {
-        if (usuarioId == null) {
-            LOGGER.warning("UsuarioId es null, no se pueden agregar puntos");
-            return;
-        }
+        if (usuarioId == null) return;
         
-        int puntos = calculatePoints(estado);
+        int puntos = validateAndCalculatePoints(estado);
+        updateUserPoints(usuarioId, puntos);
+    }
+
+    private int validateAndCalculatePoints(String estado) {
+        return calculatePoints(estado);
+    }
+
+    private void updateUserPoints(Integer usuarioId, int puntos) {
+        if (puntos <= 0) return;
         
-        if (puntos > 0) {
-            boolean resultado = usuarioDAO.addPoints(usuarioId, puntos);
-            if (resultado) {
-                LOGGER.info("Agregados " + puntos + " puntos al usuario " + usuarioId);
-            } else {
-                LOGGER.warning("No se pudieron agregar puntos al usuario " + usuarioId);
-            }
-        } else {
-            LOGGER.info("Estado " + estado + " otorga 0 puntos, no se actualiza BD");
+        boolean resultado = usuarioDAO.addPoints(usuarioId, puntos);
+        if (resultado) {
+            LOGGER.info("+" + puntos + " puntos a usuario " + usuarioId);
         }
     }
 }
